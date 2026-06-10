@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin – Fórum Zero WHS</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{--bg:#0a0f1e;--card:#111827;--border:#1e2d45;--blue:#1d6fe8;--blue-h:#2980ff;--red:#dc2626;--text:#e2e8f0;--muted:#64748b;--radius:12px}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -34,9 +33,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 .pres-name{font-size:.92rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pres-meta{font-size:.75rem;color:var(--muted);margin-top:3px}
 .badge{background:rgba(29,111,232,.2);color:#60a5fa;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:99px}
-.btn-del{background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#f87171;font-size:.82rem;padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0}
+.btn-del{background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#f87171;font-size:.82rem;padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;transition:background .2s}
 .btn-del:hover{background:rgba(220,38,38,.3)}
-.btn-del:disabled{opacity:.4;cursor:not-allowed}
 .empty-state{text-align:center;padding:28px 0;color:var(--muted);font-size:.9rem}
 #tv-status{display:flex;align-items:center;gap:10px;font-size:.82rem;margin-top:12px;padding:10px 14px;background:#0d1a2e;border-radius:8px;border:1px solid var(--border)}
 .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
@@ -46,28 +44,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 #drop-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
 #drop-zone:hover,#drop-zone.drag-over{border-color:var(--blue);background:rgba(29,111,232,.06)}
 #drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-#convert-state{display:none;margin-top:14px;background:#1a2235;border-radius:8px;padding:14px 16px}
-.conv-name{font-size:.85rem;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.prog-wrap{background:#0d1a2e;border-radius:99px;height:6px;overflow:hidden}
-.prog-fill{height:100%;background:var(--blue);border-radius:99px;width:0%;transition:width .3s}
-.prog-label{font-size:.75rem;color:var(--muted);margin-top:6px}
-#preview-thumbs{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
-#preview-thumbs img{width:72px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
+#file-ready{display:none;background:rgba(29,111,232,.1);border:1px solid rgba(29,111,232,.3);border-radius:8px;padding:12px 16px;margin-top:14px;align-items:center;gap:10px}
+#file-ready .fn{flex:1;font-size:.9rem;font-weight:600}
+#file-ready .fs{color:var(--muted);font-size:.78rem}
+#btn-clear{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px}
+#btn-clear:hover{color:#f87171}
 #btn-publish{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
 #btn-publish:hover:not(:disabled){background:var(--blue-h)}
 #btn-publish:disabled{opacity:.45;cursor:not-allowed}
-#pub-state{display:none;margin-top:12px}
-.pub-label{font-size:.82rem;color:var(--muted);margin-bottom:6px;text-align:center}
+#pub-progress{display:none;margin-top:14px}
+.pp-label{font-size:.82rem;color:var(--muted);margin-bottom:6px;text-align:center}
+.prog-wrap{background:#1a2235;border-radius:99px;height:6px;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:99px;width:0%;transition:width .4s}
 #result-box{display:none;border-radius:10px;padding:14px 16px;font-size:.88rem;line-height:1.6;margin-top:12px}
 #result-box.ok{background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3)}
 #result-box.fail{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);color:#f87171}
-.rl{color:#60a5fa;text-decoration:none}
-.rl:hover{text-decoration:underline}
+.rl{color:#60a5fa;text-decoration:none}.rl:hover{text-decoration:underline}
 .tv-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:14px}
-.tv-icon{font-size:1.6rem}
 .tv-info strong{font-size:.88rem;display:block;margin-bottom:2px}
-.tv-info a{color:#60a5fa;font-size:.8rem;text-decoration:none}
-.tv-info a:hover{text-decoration:underline}
+.tv-info a{color:#60a5fa;font-size:.8rem;text-decoration:none}.tv-info a:hover{text-decoration:underline}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 #confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:center;justify-content:center}
@@ -79,6 +74,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 .bc:hover{background:#1a2235}
 .bcd{flex:1;padding:10px;background:rgba(220,38,38,.8);border:none;color:#fff;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600}
 .bcd:hover{background:var(--red)}
+/* Wake up notice */
+#wake-notice{display:none;background:rgba(202,138,4,.1);border:1px solid rgba(202,138,4,.3);border-radius:8px;padding:10px 14px;font-size:.82rem;color:#fbbf24;margin-top:10px;text-align:center}
 </style>
 </head>
 <body>
@@ -115,6 +112,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 
   <div class="card">
     <div class="card-title">➕ Adicionar Apresentação</div>
+
     <div id="drop-zone">
       <input type="file" id="file-input" accept=".pptx">
       <div style="font-size:2rem;margin-bottom:8px">📊</div>
@@ -122,16 +120,20 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
       <div style="color:var(--muted);font-size:.8rem">ou clique para selecionar</div>
     </div>
 
-    <div id="convert-state">
-      <div class="conv-name"><span class="spinner"></span><span id="conv-fname"></span></div>
-      <div class="prog-wrap"><div class="prog-fill" id="conv-fill"></div></div>
-      <div class="prog-label" id="conv-lbl">Lendo arquivo...</div>
-      <div id="preview-thumbs"></div>
+    <div id="file-ready">
+      <span style="font-size:1.4rem">📊</span>
+      <span class="fn" id="fname"></span>
+      <span class="fs" id="fsize"></span>
+      <button id="btn-clear">✕</button>
     </div>
 
-    <div id="pub-state">
-      <div class="pub-label" id="pub-lbl">Publicando...</div>
-      <div class="prog-wrap"><div class="prog-fill" id="pub-fill"></div></div>
+    <div id="wake-notice">
+      ⏳ O servidor está acordando (pode levar ~30s na primeira vez)...
+    </div>
+
+    <div id="pub-progress">
+      <div class="pp-label" id="pp-label">Enviando arquivo...</div>
+      <div class="prog-wrap"><div class="prog-fill" id="pp-fill"></div></div>
     </div>
 
     <button id="btn-publish" disabled>
@@ -142,7 +144,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
   </div>
 
   <div class="tv-card">
-    <span class="tv-icon">📺</span>
+    <span style="font-size:1.6rem">📺</span>
     <div class="tv-info">
       <strong>Link das TVs</strong>
       <a href="https://adirr-cell.github.io/forum-zero" target="_blank">adirr-cell.github.io/forum-zero</a>
@@ -162,28 +164,23 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 </div>
 
 <script>
-const SENHA="whs2026";
-const REPO="adiRr-cell/forum-zero";
-const IV=10000;
-const GT=["ghp_MYykuIK4z","E56qexlxH2CY","JeB25mJVT4KBYNF"].join('');
+const SENHA   = "whs2026";
+const SERVER  = "https://whs-converter.onrender.com";
+const GH_REPO = "adiRr-cell/forum-zero";
+const GT      = ["ghp_MYykuIK4z","E56qexlxH2CY","JeB25mJVT4KBYNF"].join('');
 
-// Estado: lista de apresentações { id, name, date, slideCount, thumb, slides[] }
-// slides[] fica só em memória enquanto a sessão está aberta
-// No GitHub salva só o index.json com metadados leves + rebuilda o index.html
-
-let state = []; // [{id,name,date,slideCount,thumb,slides}]
-let pending = null; // slides prontos aguardando publicação
-let pendingName = '';
+let selFile   = null;
 let delTarget = null;
 
 // ── AUTH ──
-document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
-document.getElementById('btn-login').addEventListener('click',login);
+document.getElementById('pwd').addEventListener('keydown', e=>{if(e.key==='Enter')login();});
+document.getElementById('btn-login').addEventListener('click', login);
 function login(){
   if(document.getElementById('pwd').value===SENHA){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app-screen').style.display='flex';
-    loadState();
+    loadList();
+    wakeServer(); // wake up render instance
   } else {
     document.getElementById('lerr').style.display='block';
     document.getElementById('pwd').value='';
@@ -193,48 +190,50 @@ document.getElementById('btn-logout').addEventListener('click',()=>{
   document.getElementById('app-screen').style.display='none';
   document.getElementById('login-screen').style.display='block';
   document.getElementById('pwd').value='';
-  state=[]; pending=null;
 });
 
-// ── LOAD STATE ──
-// Lê o index.html atual e extrai os slides de cada apresentação por marcadores
-async function loadState(){
-  setList('<div class="empty-state">⏳ Carregando...</div>');
-  try {
-    const r = await ghGet('contents/state.json');
-    const json = JSON.parse(atob64(r.content));
-    // state sem slides[] — serão recarregados se necessário
-    state = (json.presentations||[]).map(p=>({...p, slides:null}));
-  } catch(e){
-    state = [];
-  }
-  renderList();
-  updateStatus();
+// ── WAKE SERVER (ping so it's ready when user uploads) ──
+async function wakeServer(){
+  try { await fetch(SERVER+'/'); } catch(e){}
 }
 
-// ── RENDER LIST ──
-function renderList(){
-  if(!state.length){
-    setList('<div class="empty-state">📭 Nenhuma apresentação publicada ainda.</div>');
-    return;
-  }
-  setList(state.map(p=>`
-    <div class="pres-item" id="pi_${p.id}">
-      <img class="pres-thumb" src="data:image/jpeg;base64,${p.thumb}" alt="">
-      <div class="pres-info">
-        <div class="pres-name">${xss(p.name)}</div>
-        <div class="pres-meta">${p.date} &nbsp;·&nbsp; <span class="badge">${p.slideCount} slides</span></div>
+// ── LOAD LIST ──
+async function loadList(){
+  setList('<div class="empty-state">⏳ Carregando...</div>');
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/state.json`,
+      {headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json'}});
+    if(!r.ok) throw new Error();
+    const d = await r.json();
+    const state = JSON.parse(atob(d.content.replace(/\n/g,'')));
+    const list = state.presentations || [];
+    if(!list.length){
+      setList('<div class="empty-state">📭 Nenhuma apresentação publicada ainda.</div>');
+      setStatus(false, 0);
+      return;
+    }
+    setList(list.map(p=>`
+      <div class="pres-item" id="pi_${p.id}">
+        <img class="pres-thumb" src="data:image/jpeg;base64,${p.thumb}" alt="">
+        <div class="pres-info">
+          <div class="pres-name">${esc(p.name)}</div>
+          <div class="pres-meta">${p.date} · <span class="badge">${p.slideCount} slides</span></div>
+        </div>
+        <button class="btn-del" onclick="askDel('${p.id}','${esc(p.name)}')">🗑 Excluir</button>
       </div>
-      <button class="btn-del" onclick="askDel('${p.id}','${xss(p.name)}')">🗑 Excluir</button>
-    </div>
-  `).join(''));
+    `).join(''));
+    const total = list.reduce((a,p)=>a+p.slideCount,0);
+    setStatus(true, total, list.length);
+  } catch(e){
+    setList('<div class="empty-state">📭 Nenhuma apresentação ainda.</div>');
+    setStatus(false, 0);
+  }
 }
 
 function setList(html){ document.getElementById('pres-list').innerHTML=html; }
-function updateStatus(){
+function setStatus(on, slides, count=0){
   const dot=document.getElementById('tv-dot'), txt=document.getElementById('tv-txt');
-  const total=state.reduce((a,p)=>a+p.slideCount,0);
-  if(state.length){ dot.className='dot green'; txt.textContent=`${state.length} apresentação(ões) ativa(s) · ${total} slides`; }
+  if(on){ dot.className='dot green'; txt.textContent=`${count} apresentação(ões) ativa(s) · ${slides} slides`; }
   else { dot.className='dot yellow'; txt.textContent='Nenhuma apresentação ativa'; }
 }
 
@@ -244,23 +243,27 @@ function askDel(id,name){
   document.getElementById('confirm-msg').textContent=`Isso vai remover "${name}" da TV.`;
   document.getElementById('confirm-overlay').style.display='flex';
 }
-document.getElementById('btn-cancel').addEventListener('click',()=>{ document.getElementById('confirm-overlay').style.display='none'; delTarget=null; });
+document.getElementById('btn-cancel').addEventListener('click',()=>{
+  document.getElementById('confirm-overlay').style.display='none'; delTarget=null;
+});
 document.getElementById('btn-ok-del').addEventListener('click', async()=>{
   document.getElementById('confirm-overlay').style.display='none';
   if(!delTarget) return;
   const id=delTarget; delTarget=null;
-  // Grey out item
   const el=document.getElementById('pi_'+id);
   if(el){el.style.opacity='.4';el.style.pointerEvents='none';}
-  // Remove from state
-  state=state.filter(p=>p.id!==id);
   try {
-    await saveStateAndRebuild();
-    renderList(); updateStatus();
+    const r = await fetch(SERVER+'/delete',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id})
+    });
+    const d = await r.json();
+    if(!d.ok) throw new Error(d.error||'Erro');
     showResult('ok','✅ Apresentação removida. TV atualiza em ~1 min.');
+    loadList();
   } catch(e){
     showResult('fail','❌ Erro ao excluir: '+e.message);
-    loadState(); // reload
+    loadList();
   }
 });
 
@@ -269,225 +272,93 @@ const dz=document.getElementById('drop-zone'), fi=document.getElementById('file-
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.name.endsWith('.pptx'))pickFile(f);else alert('Selecione um .pptx');});
-fi.addEventListener('change',()=>{ if(fi.files[0])pickFile(fi.files[0]); });
+fi.addEventListener('change',()=>{if(fi.files[0])pickFile(fi.files[0]);});
 
-async function pickFile(f){
-  pending=null; pendingName=f.name.replace(/\.pptx$/i,'');
+function pickFile(f){
+  selFile=f;
+  document.getElementById('fname').textContent=f.name;
+  document.getElementById('fsize').textContent=(f.size/1024/1024).toFixed(1)+' MB';
+  document.getElementById('file-ready').style.display='flex';
   document.getElementById('result-box').style.display='none';
-  document.getElementById('preview-thumbs').innerHTML='';
-  document.getElementById('convert-state').style.display='block';
-  document.getElementById('conv-fname').textContent=f.name;
-  setConv(0,'Lendo arquivo...'); updBtn();
-
-  try {
-    const bytes=await readBytes(f);
-    const slides=await pptxToImages(bytes,(n,t)=>setConv(Math.round(n/t*100),`Convertendo slide ${n} de ${t}...`));
-    pending=slides;
-    setConv(100,`${slides.length} slides prontos ✅`);
-    const grid=document.getElementById('preview-thumbs');
-    slides.slice(0,10).forEach((s,i)=>{
-      const img=document.createElement('img');img.src='data:image/jpeg;base64,'+s;img.title='Slide '+(i+1);grid.appendChild(img);
-    });
-    if(slides.length>10){const sp=document.createElement('span');sp.style.cssText='font-size:.74rem;color:var(--muted);align-self:center';sp.textContent=`+${slides.length-10} mais`;grid.appendChild(sp);}
-  } catch(err){ setConv(0,'⚠️ '+err.message); }
   updBtn();
 }
-
-function setConv(pct,lbl){ document.getElementById('conv-fill').style.width=pct+'%'; document.getElementById('conv-lbl').textContent=lbl; }
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  selFile=null; fi.value='';
+  document.getElementById('file-ready').style.display='none';
+  updBtn();
+});
 function updBtn(){
   const btn=document.getElementById('btn-publish'), lbl=document.getElementById('btn-lbl');
-  btn.disabled=!pending;
-  lbl.textContent=pending?'🚀 Publicar na TV':'Aguarde, convertendo...';
+  btn.disabled=!selFile;
+  lbl.textContent=selFile?'🚀 Publicar na TV':'Selecione um arquivo .pptx';
 }
 
 // ── PUBLISH ──
 document.getElementById('btn-publish').addEventListener('click', doPublish);
 async function doPublish(){
-  if(!pending) return;
+  if(!selFile) return;
   const btn=document.getElementById('btn-publish');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span><span>Publicando...</span>';
-  document.getElementById('pub-state').style.display='block';
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span><span>Publicando...</span>';
+  document.getElementById('pub-progress').style.display='block';
   document.getElementById('result-box').style.display='none';
 
   try {
-    setPub(15,'Preparando...');
-    const id='p'+Date.now();
-    const now=new Date();
-    const date=now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    state.push({id, name:pendingName, date, slideCount:pending.length, thumb:pending[0], slides:pending});
+    setPP(10,'Lendo arquivo...');
+    const bytes = await readBytes(selFile);
+    const b64 = arrayBufferToBase64(bytes);
+    const name = selFile.name.replace(/\.pptx$/i,'');
 
-    setPub(40,'Gerando apresentação...');
-    setPub(70,'Publicando no GitHub...');
-    await saveStateAndRebuild();
+    setPP(20,'Enviando para conversão...');
+    document.getElementById('wake-notice').style.display='block';
 
-    setPub(100,'Publicado ✅');
-    renderList(); updateStatus();
+    const resp = await fetch(SERVER+'/convert', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({pptx: b64, name, action:'add'}),
+      signal: AbortSignal.timeout(300000) // 5 min timeout
+    });
 
-    pending=null; pendingName=''; fi.value='';
-    document.getElementById('convert-state').style.display='none';
-    document.getElementById('preview-thumbs').innerHTML='';
-    showResult('ok',`✅ <strong>"${state[state.length-1]?.name||'Apresentação'}"</strong> publicada!<br>TV atualiza em <strong>~1 minuto</strong>.<br><a class="rl" href="https://adirr-cell.github.io/forum-zero" target="_blank">↗ Abrir link da TV</a>`);
+    document.getElementById('wake-notice').style.display='none';
+
+    if(!resp.ok){
+      const err = await resp.json().catch(()=>({}));
+      throw new Error(err.error || 'Erro no servidor: '+resp.status);
+    }
+
+    setPP(90,'Finalizando...');
+    const data = await resp.json();
+
+    if(!data.ok) throw new Error(data.error||'Erro desconhecido');
+
+    setPP(100,'Publicado ✅');
+    showResult('ok',`✅ <strong>"${data.name}"</strong> publicado! ${data.slideCount} slides.<br>TV atualiza em <strong>~1 minuto</strong>.<br><a class="rl" href="https://adirr-cell.github.io/forum-zero" target="_blank">↗ Abrir link da TV</a>`);
+
+    selFile=null; fi.value='';
+    document.getElementById('file-ready').style.display='none';
+    loadList();
+
   } catch(e){
-    showResult('fail','❌ Erro: '+e.message);
-    state.pop(); // rollback
+    document.getElementById('wake-notice').style.display='none';
+    showResult('fail','❌ Erro: '+(e.message||e));
   }
-  setTimeout(()=>{document.getElementById('pub-state').style.display='none';document.getElementById('pub-fill').style.width='0%';},2000);
+
+  setTimeout(()=>{document.getElementById('pub-progress').style.display='none';document.getElementById('pp-fill').style.width='0%';},2000);
   updBtn();
 }
 
-function setPub(pct,lbl){ document.getElementById('pub-fill').style.width=pct+'%'; document.getElementById('pub-lbl').textContent=lbl; }
-function showResult(type,html){ const r=document.getElementById('result-box'); r.className='result-box '+type; r.innerHTML=html; r.style.display='block'; }
-
-// ── SAVE STATE + REBUILD TV ──
-// Estratégia: salva state.json (metadados leves) + index.html (tudo embutido)
-// O index.html é gerado localmente com todos os slides em base64 — sem chamada extra ao GitHub por apresentação
-async function saveStateAndRebuild(){
-  // Collect all slides — presentations with slides==null need to be fetched first
-  let allSlides=[];
-  for(const p of state){
-    if(p.slides && p.slides.length){
-      allSlides=allSlides.concat(p.slides);
-    } else {
-      // Precisa recarregar do GitHub — só acontece após reload de página
-      throw new Error(`Slides de "${p.name}" não estão em memória. Recarregue a página e tente novamente.`);
-    }
-  }
-
-  // Save state.json (sem os slides, só metadados)
-  const meta={presentations:state.map(p=>({id:p.id,name:p.name,date:p.date,slideCount:p.slideCount,thumb:p.thumb}))};
-  await ghUpload('state.json', JSON.stringify(meta));
-
-  // Build and save index.html
-  const html=buildTV(allSlides, state);
-  await ghUpload('index.html', html);
+function setPP(pct,lbl){
+  document.getElementById('pp-fill').style.width=pct+'%';
+  document.getElementById('pp-label').textContent=lbl;
+}
+function showResult(type,html){
+  const r=document.getElementById('result-box'); r.className='result-box '+type; r.innerHTML=html; r.style.display='block';
 }
 
-// ── BUILD TV HTML ──
-function buildTV(slidesB64, pList){
-  const T=slidesB64.length;
-  if(!T) return buildEmptyTV();
-  const SD='[\n'+slidesB64.map(s=>`"data:image/jpeg;base64,${s}"`).join(',\n')+'\n]';
-  const title=pList.map(p=>p.name).join(' · ');
-  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Fórum Zero – WHS</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;cursor:none}body.su{cursor:default}#si{width:100%;height:100%;object-fit:contain;display:block;user-select:none}#ui{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}body.su #ui{opacity:1;pointer-events:auto}.ar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.3);color:#fff;font-size:2.5rem;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}.ar:hover{background:rgba(0,100,200,.75)}#bp{left:24px}#bn{right:24px}#tb{position:absolute;top:0;left:0;right:0;height:56px;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);display:flex;align-items:center;justify-content:space-between;padding:0 24px}#ctr{color:#fff;font-size:1.1rem;font-weight:bold}#ttl{color:#ddd;font-size:.85rem}#bfs{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;padding:4px 10px;border-radius:6px;cursor:pointer}#bb{position:absolute;bottom:0;left:0;right:0;height:72px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:center;gap:16px;padding:0 100px}#ts{display:flex;gap:6px;overflow-x:auto;max-width:70vw;scrollbar-width:none}#ts::-webkit-scrollbar{display:none}.th{flex-shrink:0;width:72px;height:40px;object-fit:cover;border-radius:4px;border:2px solid transparent;cursor:pointer;opacity:.6}.th:hover{opacity:1}.th.active{border-color:#4da6ff;opacity:1}#bpl{flex-shrink:0;background:rgba(0,120,255,.8);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:1.4rem;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}#pw{position:fixed;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,.15);z-index:20}#pb{height:100%;background:#4da6ff;width:0%;transition:width linear}#bdg{position:fixed;bottom:12px;right:18px;color:rgba(255,255,255,.35);font-size:.78rem;pointer-events:none;z-index:5}#tst{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:8px 20px;border-radius:20px;font-size:.9rem;pointer-events:none;opacity:0;transition:opacity .4s;z-index:30}#tst.show{opacity:1}#fsp{position:fixed;inset:0;background:#001a3a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;cursor:pointer;gap:20px}#fsp h1{color:#fff;font-size:2.2rem;font-weight:bold;text-align:center}#fsp p{color:#aac8ff;font-size:1rem;text-align:center;max-width:480px}#fsb{background:#0066cc;color:#fff;border:none;border-radius:12px;padding:18px 48px;font-size:1.4rem;cursor:pointer;font-weight:bold}#fsb:hover{background:#0088ff}#fsp.hidden{display:none}</style></head>
-<body>
-<div id="fsp"><h1>📺 Fórum Zero – WHS</h1><p>${xssSafe(title)}</p><button id="fsb">▶ Iniciar</button><p style="font-size:.82rem;color:#667799">${T} slides · Clique para tela cheia</p></div>
-<div style="width:100vw;height:100vh;display:flex;align-items:center;justify-content:center"><img id="si" src="" alt="" draggable="false"></div>
-<div id="ui"><div id="tb"><span id="ctr">1/${T}</span><span id="ttl">${xssSafe(title)}</span><button id="bfs">⛶ Tela cheia</button></div><button class="ar" id="bp">&#8592;</button><button class="ar" id="bn">&#8594;</button><div id="bb"><button id="bpl">⏸</button><div id="ts"></div></div></div>
-<div id="pw"><div id="pb"></div></div><div id="bdg">1/${T}</div><div id="tst"></div>
-<script>
-const S=${SD},T=S.length,IV=${IV};let C=0,P=true,tmr=null,ut=null;
-const si=document.getElementById('si'),ctr=document.getElementById('ctr'),bdg=document.getElementById('bdg'),ts=document.getElementById('ts'),bpl=document.getElementById('bpl'),pb=document.getElementById('pb'),tst=document.getElementById('tst');
-S.forEach(s=>{const i=new Image();i.src=s;});
-function gt(n){C=((n%T)+T)%T;si.src=S[C];const l=(C+1)+'/'+T;ctr.textContent=l;bdg.textContent=l;document.querySelectorAll('.th').forEach((t,i)=>t.classList.toggle('active',i===C));const a=ts.querySelectorAll('.th')[C];if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});if(P)sa();}
-function sa(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>{pb.style.transition='width '+IV+'ms linear';pb.style.width='100%';}));tmr=setInterval(()=>gt(C+1),IV);}
-function stp(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%';}
-function setP(v){P=v;bpl.textContent=v?'⏸':'▶';v?sa():stp();shT(v?'▶ Autoplay':'⏸ Pausado');}
-function shT(m){tst.textContent=m;tst.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>tst.classList.remove('show'),1800);}
-S.forEach((s,i)=>{const t=document.createElement('img');t.src=s;t.className='th'+(i===0?' active':'');t.addEventListener('click',()=>gt(i));ts.appendChild(t);});
-gt(0);
-function eFS(){const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen();else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}
-function tFS(){if(!document.fullscreenElement&&!document.webkitFullscreenElement)eFS();else if(document.exitFullscreen)document.exitFullscreen();}
-document.getElementById('fsb').addEventListener('click',()=>{eFS();document.getElementById('fsp').classList.add('hidden');setP(true);});
-document.getElementById('fsp').addEventListener('click',e=>{if(e.target!==document.getElementById('fsb')){eFS();document.getElementById('fsp').classList.add('hidden');setP(true);}});
-document.getElementById('bfs').addEventListener('click',tFS);
-document.getElementById('bp').addEventListener('click',()=>gt(C-1));
-document.getElementById('bn').addEventListener('click',()=>gt(C+1));
-bpl.addEventListener('click',()=>setP(!P));
-function shUI(){document.body.classList.add('su');clearTimeout(ut);ut=setTimeout(()=>document.body.classList.remove('su'),3500);}
-document.addEventListener('mousemove',shUI);document.addEventListener('touchstart',shUI);
-document.addEventListener('keydown',e=>{shUI();switch(e.key){case'ArrowRight':case'ArrowDown':case'PageDown':e.preventDefault();gt(C+1);break;case'ArrowLeft':case'ArrowUp':case'PageUp':e.preventDefault();gt(C-1);break;case' ':e.preventDefault();setP(!P);break;case'p':case'P':setP(!P);break;case'f':case'F':tFS();break;}});
-let tx=null;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});document.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?gt(C+1):gt(C-1);}tx=null;});
-<\/script></body></html>`;
-}
-
-function buildEmptyTV(){
-  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Fórum Zero – WHS</title><style>*{margin:0;padding:0}body{background:#001a3a;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;font-family:Arial,sans-serif;gap:16px}</style></head><body><div style="font-size:3rem">📺</div><h2>Fórum Zero – WHS</h2><p style="color:#667799">Nenhuma apresentação ativa no momento.</p></body></html>`;
-}
-
-// ── PPTX → IMAGES (browser, JSZip) ──
-async function pptxToImages(buf, onProg){
-  const zip=await JSZip.loadAsync(buf);
-  const presFile=zip.file('ppt/presentation.xml');
-  if(!presFile) throw new Error('Arquivo .pptx inválido.');
-  const presXml=await presFile.async('text');
-  const relsFile=zip.file('ppt/_rels/presentation.xml.rels');
-  const relsXml=relsFile?await relsFile.async('text'):'';
-  const rIdMap={};
-  for(const m of relsXml.matchAll(/Id="(rId\d+)"[^>]+Target="(slides\/slide\d+\.xml)"/g)) rIdMap[m[1]]=m[2];
-  const slideIds=[...presXml.matchAll(/r:id="(rId\d+)"/g)].map(m=>m[1]);
-  let sFiles=slideIds.map(id=>rIdMap[id]).filter(Boolean).map(f=>'ppt/'+f);
-  if(!sFiles.length) sFiles=Object.keys(zip.files).filter(n=>n.match(/^ppt\/slides\/slide\d+\.xml$/)).sort((a,b)=>+a.match(/\d+/)[0]-+b.match(/\d+/)[0]);
-  if(!sFiles.length) throw new Error('Nenhum slide encontrado.');
-
-  const imgs=[];
-  for(let i=0;i<sFiles.length;i++){
-    onProg(i+1,sFiles.length);
-    const sf=sFiles[i];
-    const xml=await zip.file(sf).async('text');
-    const rp=sf.replace('ppt/slides/','ppt/slides/_rels/').replace('.xml','.xml.rels');
-    const sr=zip.file(rp)?await zip.file(rp).async('text'):'';
-    const mRefs=[...sr.matchAll(/Id="(rId\d+)"[^>]+Target="\.\.\/media\/([^"]+)"/g)];
-    const iMap={};
-    for(const m of mRefs){
-      const mp='ppt/media/'+m[2];
-      if(zip.file(mp)){
-        const b=await zip.file(mp).async('uint8array');
-        const ext=m[2].split('.').pop().toLowerCase();
-        const mime=ext==='jpg'||ext==='jpeg'?'image/jpeg':ext==='png'?'image/png':'image/'+ext;
-        iMap[m[1]]=await loadImg(b,mime);
-      }
-    }
-    const bgM=xml.match(/solidFill[\s\S]{0,80}?<a:srgbClr val="([0-9A-Fa-f]{6})"/);
-    const bgC=bgM?'#'+bgM[1]:'#0d3080';
-    const texts=[...xml.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>dX(m[1])).filter(t=>t.trim());
-    const canvas=document.createElement('canvas');canvas.width=1280;canvas.height=720;
-    const ctx=canvas.getContext('2d');
-    const iList=Object.values(iMap).filter(Boolean);
-    const hasBg=iList.length>0;
-    if(hasBg){ctx.drawImage(iList[0],0,0,1280,720);}
-    else{
-      const g=ctx.createLinearGradient(0,0,1280,720);g.addColorStop(0,bgC);g.addColorStop(1,shade(bgC,-50));ctx.fillStyle=g;ctx.fillRect(0,0,1280,720);
-      ctx.globalAlpha=.08;ctx.fillStyle='#4da6ff';ctx.beginPath();ctx.arc(1150,110,230,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(80,650,170,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
-      ctx.fillStyle='#4da6ff';ctx.fillRect(0,714,1280,6);ctx.globalAlpha=.5;ctx.fillRect(0,0,6,720);ctx.globalAlpha=1;
-    }
-    let iC=0;
-    for(let k=hasBg?1:0;k<iList.length&&iC<2;k++){const im=iList[k];if(!im)continue;const iw=Math.min(im.width,500),ih=iw*im.height/im.width;try{ctx.drawImage(im,700,80+iC*20,Math.min(iw,550),Math.min(ih,500));}catch(e){}iC++;}
-    const tW=iC>0?580:1160,tX=60;let y=70;
-    for(let t=0;t<texts.length&&y<680;t++){
-      const txt=texts[t].trim();if(!txt)continue;
-      if(t===0){ctx.fillStyle='#fff';ctx.textAlign='left';const sz=txt.length>50?38:txt.length>30?46:56;ctx.font=`bold ${sz}px Arial`;const ln=dW(ctx,txt,tX,y,tW,sz*1.25);y+=ln*sz*1.25+14;ctx.fillStyle='#4da6ff';ctx.globalAlpha=.6;ctx.fillRect(tX,y-6,Math.min(360,tW*.55),3);ctx.globalAlpha=1;y+=8;}
-      else if(t===1&&!hasBg){ctx.fillStyle='rgba(255,255,255,.7)';ctx.font='28px Arial';const ln=dW(ctx,txt,tX,y,tW,36);y+=ln*36+10;}
-      else{ctx.fillStyle='#4da6ff';ctx.beginPath();ctx.arc(tX+10,y-6,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='23px Arial';const ln=dW(ctx,txt,tX+24,y,tW-28,30);y+=ln*30+7;}
-    }
-    ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='18px Arial';ctx.textAlign='right';ctx.fillText(`${i+1}/${sFiles.length}`,1256,706);
-    imgs.push(canvas.toDataURL('image/jpeg',.85).split(',')[1]);
-  }
-  return imgs;
-}
-
-function loadImg(bytes,mime){return new Promise(res=>{const b=new Blob([bytes],{type:mime});const u=URL.createObjectURL(b);const i=new Image();i.onload=()=>{URL.revokeObjectURL(u);res(i);};i.onerror=()=>res(null);i.src=u;});}
-function dW(ctx,text,x,y,maxW,lh){const ws=(text||'').split(' ');let l='',ln=0;for(const w of ws){const t=l?l+' '+w:w;if(ctx.measureText(t).width>maxW&&l){ctx.fillText(l,x,y+ln*lh);ln++;l=w;}else l=t;}if(l){ctx.fillText(l,x,y+ln*lh);ln++;}return ln;}
-function shade(hex,a){const n=parseInt((hex||'#0d3080').replace('#',''),16);const r=Math.min(255,Math.max(0,(n>>16)+a));const g=Math.min(255,Math.max(0,((n>>8)&0xff)+a));const b=Math.min(255,Math.max(0,(n&0xff)+a));return'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');}
-function dX(s){return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'");}
-function xss(s){return(s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');}
-function xssSafe(s){return(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-// ── GITHUB ──
-async function ghGet(path){
-  const r=await fetch(`https://api.github.com/repos/${REPO}/${path}`,{headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json'}});
-  if(!r.ok) throw new Error('GitHub '+r.status);
-  return r.json();
-}
-async function ghUpload(file,content){
-  const b64=btoa(unescape(encodeURIComponent(content)));
-  let sha=null;
-  try{const c=await ghGet(`contents/${file}`);sha=c.sha;}catch(e){}
-  const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${file}`,{method:'PUT',headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:'WHS Admin',content:b64,...(sha?{sha}:{})})});
-  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'Upload falhou');}
-}
-function atob64(s){return decodeURIComponent(escape(atob(s.replace(/\n/g,''))));}
+// ── UTILS ──
 function readBytes(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsArrayBuffer(f);});}
+function arrayBufferToBase64(buf){const b=new Uint8Array(buf);let s='';for(let i=0;i<b.byteLength;i++)s+=String.fromCharCode(b[i]);return btoa(s);}
+function esc(s){return(s||'').replace(/'/g,"\\'").replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
 </html>
