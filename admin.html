@@ -33,7 +33,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 .pres-name{font-size:.92rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pres-meta{font-size:.75rem;color:var(--muted);margin-top:3px}
 .badge{background:rgba(29,111,232,.2);color:#60a5fa;font-size:.7rem;font-weight:600;padding:2px 8px;border-radius:99px}
-.btn-del{background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#f87171;font-size:.82rem;padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0;transition:background .2s}
+.btn-del{background:rgba(220,38,38,.15);border:1px solid rgba(220,38,38,.3);color:#f87171;font-size:.82rem;padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0}
 .btn-del:hover{background:rgba(220,38,38,.3)}
 .empty-state{text-align:center;padding:28px 0;color:var(--muted);font-size:.9rem}
 #tv-status{display:flex;align-items:center;gap:10px;font-size:.82rem;margin-top:12px;padding:10px 14px;background:#0d1a2e;border-radius:8px;border:1px solid var(--border)}
@@ -45,8 +45,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 #drop-zone:hover,#drop-zone.drag-over{border-color:var(--blue);background:rgba(29,111,232,.06)}
 #drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 #file-ready{display:none;background:rgba(29,111,232,.1);border:1px solid rgba(29,111,232,.3);border-radius:8px;padding:12px 16px;margin-top:14px;align-items:center;gap:10px}
-#file-ready .fn{flex:1;font-size:.9rem;font-weight:600}
-#file-ready .fs{color:var(--muted);font-size:.78rem}
+.fn{flex:1;font-size:.9rem;font-weight:600}
+.fs{color:var(--muted);font-size:.78rem}
 #btn-clear{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px}
 #btn-clear:hover{color:#f87171}
 #btn-publish{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
@@ -74,8 +74,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 .bc:hover{background:#1a2235}
 .bcd{flex:1;padding:10px;background:rgba(220,38,38,.8);border:none;color:#fff;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600}
 .bcd:hover{background:var(--red)}
-/* Wake up notice */
-#wake-notice{display:none;background:rgba(202,138,4,.1);border:1px solid rgba(202,138,4,.3);border-radius:8px;padding:10px 14px;font-size:.82rem;color:#fbbf24;margin-top:10px;text-align:center}
 </style>
 </head>
 <body>
@@ -112,34 +110,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-se
 
   <div class="card">
     <div class="card-title">➕ Adicionar Apresentação</div>
-
     <div id="drop-zone">
       <input type="file" id="file-input" accept=".pptx">
       <div style="font-size:2rem;margin-bottom:8px">📊</div>
       <div style="font-size:.95rem;font-weight:600;margin-bottom:4px">Arraste o .pptx aqui</div>
       <div style="color:var(--muted);font-size:.8rem">ou clique para selecionar</div>
     </div>
-
     <div id="file-ready">
       <span style="font-size:1.4rem">📊</span>
       <span class="fn" id="fname"></span>
       <span class="fs" id="fsize"></span>
       <button id="btn-clear">✕</button>
     </div>
-
-    <div id="wake-notice">
-      ⏳ O servidor está acordando (pode levar ~30s na primeira vez)...
-    </div>
-
     <div id="pub-progress">
-      <div class="pp-label" id="pp-label">Enviando arquivo...</div>
+      <div class="pp-label" id="pp-label">Enviando...</div>
       <div class="prog-wrap"><div class="prog-fill" id="pp-fill"></div></div>
     </div>
-
     <button id="btn-publish" disabled>
       <span id="btn-lbl">Selecione um arquivo .pptx</span>
     </button>
-
     <div id="result-box"></div>
   </div>
 
@@ -169,18 +158,17 @@ const SERVER  = "https://whs-converter.onrender.com";
 const GH_REPO = "adiRr-cell/forum-zero";
 const GT      = ["ghp_MYykuIK4z","E56qexlxH2CY","JeB25mJVT4KBYNF"].join('');
 
-let selFile   = null;
-let delTarget = null;
+let selFile = null, delTarget = null;
 
 // ── AUTH ──
-document.getElementById('pwd').addEventListener('keydown', e=>{if(e.key==='Enter')login();});
-document.getElementById('btn-login').addEventListener('click', login);
+document.getElementById('pwd').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+document.getElementById('btn-login').addEventListener('click',login);
 function login(){
   if(document.getElementById('pwd').value===SENHA){
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app-screen').style.display='flex';
     loadList();
-    wakeServer(); // wake up render instance
+    fetch(SERVER+'/').catch(()=>{}); // wake server
   } else {
     document.getElementById('lerr').style.display='block';
     document.getElementById('pwd').value='';
@@ -192,12 +180,7 @@ document.getElementById('btn-logout').addEventListener('click',()=>{
   document.getElementById('pwd').value='';
 });
 
-// ── WAKE SERVER (ping so it's ready when user uploads) ──
-async function wakeServer(){
-  try { await fetch(SERVER+'/'); } catch(e){}
-}
-
-// ── LOAD LIST ──
+// ── LIST ──
 async function loadList(){
   setList('<div class="empty-state">⏳ Carregando...</div>');
   try {
@@ -207,11 +190,7 @@ async function loadList(){
     const d = await r.json();
     const state = JSON.parse(atob(d.content.replace(/\n/g,'')));
     const list = state.presentations || [];
-    if(!list.length){
-      setList('<div class="empty-state">📭 Nenhuma apresentação publicada ainda.</div>');
-      setStatus(false, 0);
-      return;
-    }
+    if(!list.length){setList('<div class="empty-state">📭 Nenhuma apresentação ainda.</div>');setStatus(false,0);return;}
     setList(list.map(p=>`
       <div class="pres-item" id="pi_${p.id}">
         <img class="pres-thumb" src="data:image/jpeg;base64,${p.thumb}" alt="">
@@ -220,60 +199,48 @@ async function loadList(){
           <div class="pres-meta">${p.date} · <span class="badge">${p.slideCount} slides</span></div>
         </div>
         <button class="btn-del" onclick="askDel('${p.id}','${esc(p.name)}')">🗑 Excluir</button>
-      </div>
-    `).join(''));
-    const total = list.reduce((a,p)=>a+p.slideCount,0);
-    setStatus(true, total, list.length);
+      </div>`).join(''));
+    setStatus(true, list.reduce((a,p)=>a+p.slideCount,0), list.length);
   } catch(e){
     setList('<div class="empty-state">📭 Nenhuma apresentação ainda.</div>');
-    setStatus(false, 0);
+    setStatus(false,0);
   }
 }
-
-function setList(html){ document.getElementById('pres-list').innerHTML=html; }
-function setStatus(on, slides, count=0){
-  const dot=document.getElementById('tv-dot'), txt=document.getElementById('tv-txt');
-  if(on){ dot.className='dot green'; txt.textContent=`${count} apresentação(ões) ativa(s) · ${slides} slides`; }
-  else { dot.className='dot yellow'; txt.textContent='Nenhuma apresentação ativa'; }
+function setList(html){document.getElementById('pres-list').innerHTML=html;}
+function setStatus(on,slides,count=0){
+  const dot=document.getElementById('tv-dot'),txt=document.getElementById('tv-txt');
+  if(on){dot.className='dot green';txt.textContent=`${count} apresentação(ões) · ${slides} slides`;}
+  else{dot.className='dot yellow';txt.textContent='Nenhuma apresentação ativa';}
 }
 
 // ── DELETE ──
 function askDel(id,name){
   delTarget=id;
-  document.getElementById('confirm-msg').textContent=`Isso vai remover "${name}" da TV.`;
+  document.getElementById('confirm-msg').textContent=`Remover "${name}" da TV?`;
   document.getElementById('confirm-overlay').style.display='flex';
 }
-document.getElementById('btn-cancel').addEventListener('click',()=>{
-  document.getElementById('confirm-overlay').style.display='none'; delTarget=null;
-});
-document.getElementById('btn-ok-del').addEventListener('click', async()=>{
+document.getElementById('btn-cancel').addEventListener('click',()=>{document.getElementById('confirm-overlay').style.display='none';delTarget=null;});
+document.getElementById('btn-ok-del').addEventListener('click',async()=>{
   document.getElementById('confirm-overlay').style.display='none';
-  if(!delTarget) return;
-  const id=delTarget; delTarget=null;
+  if(!delTarget)return;
+  const id=delTarget;delTarget=null;
   const el=document.getElementById('pi_'+id);
   if(el){el.style.opacity='.4';el.style.pointerEvents='none';}
-  try {
-    const r = await fetch(SERVER+'/delete',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({id})
-    });
-    const d = await r.json();
-    if(!d.ok) throw new Error(d.error||'Erro');
+  try{
+    const r=await fetch(SERVER+'/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'Erro');
     showResult('ok','✅ Apresentação removida. TV atualiza em ~1 min.');
     loadList();
-  } catch(e){
-    showResult('fail','❌ Erro ao excluir: '+e.message);
-    loadList();
-  }
+  }catch(e){showResult('fail','❌ '+e.message);loadList();}
 });
 
-// ── FILE PICK ──
-const dz=document.getElementById('drop-zone'), fi=document.getElementById('file-input');
+// ── FILE ──
+const dz=document.getElementById('drop-zone'),fi=document.getElementById('file-input');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.name.endsWith('.pptx'))pickFile(f);else alert('Selecione um .pptx');});
 fi.addEventListener('change',()=>{if(fi.files[0])pickFile(fi.files[0]);});
-
 function pickFile(f){
   selFile=f;
   document.getElementById('fname').textContent=f.name;
@@ -282,80 +249,68 @@ function pickFile(f){
   document.getElementById('result-box').style.display='none';
   updBtn();
 }
-document.getElementById('btn-clear').addEventListener('click',()=>{
-  selFile=null; fi.value='';
-  document.getElementById('file-ready').style.display='none';
-  updBtn();
-});
-function updBtn(){
-  const btn=document.getElementById('btn-publish'), lbl=document.getElementById('btn-lbl');
-  btn.disabled=!selFile;
-  lbl.textContent=selFile?'🚀 Publicar na TV':'Selecione um arquivo .pptx';
-}
+document.getElementById('btn-clear').addEventListener('click',()=>{selFile=null;fi.value='';document.getElementById('file-ready').style.display='none';updBtn();});
+function updBtn(){const btn=document.getElementById('btn-publish'),lbl=document.getElementById('btn-lbl');btn.disabled=!selFile;lbl.textContent=selFile?'🚀 Publicar na TV':'Selecione um arquivo .pptx';}
 
 // ── PUBLISH ──
-document.getElementById('btn-publish').addEventListener('click', doPublish);
+document.getElementById('btn-publish').addEventListener('click',doPublish);
 async function doPublish(){
-  if(!selFile) return;
+  if(!selFile)return;
   const btn=document.getElementById('btn-publish');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spinner"></span><span>Publicando...</span>';
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span><span>Publicando...</span>';
   document.getElementById('pub-progress').style.display='block';
   document.getElementById('result-box').style.display='none';
 
-  try {
-    setPP(10,'Lendo arquivo...');
-    const bytes = await readBytes(selFile);
-    const b64 = arrayBufferToBase64(bytes);
-    const name = selFile.name.replace(/\.pptx$/i,'');
+  try{
+    const name=selFile.name.replace(/\.pptx$/i,'');
+    const ghPath=`uploads/tmp_${Date.now()}.pptx`;
 
-    setPP(20,'Enviando para conversão...');
-    document.getElementById('wake-notice').style.display='block';
+    // Step 1: Upload pptx to GitHub (in chunks if needed)
+    setPP(10,'Fazendo upload do arquivo...');
+    const bytes=await readBytes(selFile);
+    const b64=arrayBufferToBase64(bytes);
 
-    const resp = await fetch(SERVER+'/convert', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({pptx: b64, name, action:'add'}),
-      signal: AbortSignal.timeout(300000) // 5 min timeout
+    // Upload to GitHub
+    const uploadBody=JSON.stringify({message:'Temp upload pptx',content:b64});
+    const uploadResp=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${ghPath}`,{
+      method:'PUT',
+      headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:uploadBody
     });
-
-    document.getElementById('wake-notice').style.display='none';
-
-    if(!resp.ok){
-      const err = await resp.json().catch(()=>({}));
-      throw new Error(err.error || 'Erro no servidor: '+resp.status);
+    if(!uploadResp.ok){
+      const e=await uploadResp.json().catch(()=>({}));
+      throw new Error('Erro no upload: '+(e.message||uploadResp.status));
     }
 
-    setPP(90,'Finalizando...');
-    const data = await resp.json();
-
-    if(!data.ok) throw new Error(data.error||'Erro desconhecido');
+    // Step 2: Ask server to process
+    setPP(50,'Convertendo slides (pode levar 1-2 min)...');
+    const procResp=await fetch(SERVER+'/process',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({gh_path:ghPath,name,action:'add'}),
+      signal:AbortSignal.timeout(300000)
+    });
+    if(!procResp.ok){
+      const e=await procResp.json().catch(()=>({}));
+      throw new Error(e.error||'Erro no servidor: '+procResp.status);
+    }
+    const data=await procResp.json();
+    if(!data.ok)throw new Error(data.error||'Erro desconhecido');
 
     setPP(100,'Publicado ✅');
     showResult('ok',`✅ <strong>"${data.name}"</strong> publicado! ${data.slideCount} slides.<br>TV atualiza em <strong>~1 minuto</strong>.<br><a class="rl" href="https://adirr-cell.github.io/forum-zero" target="_blank">↗ Abrir link da TV</a>`);
-
-    selFile=null; fi.value='';
+    selFile=null;fi.value='';
     document.getElementById('file-ready').style.display='none';
     loadList();
-
-  } catch(e){
-    document.getElementById('wake-notice').style.display='none';
+  }catch(e){
     showResult('fail','❌ Erro: '+(e.message||e));
   }
-
   setTimeout(()=>{document.getElementById('pub-progress').style.display='none';document.getElementById('pp-fill').style.width='0%';},2000);
   updBtn();
 }
 
-function setPP(pct,lbl){
-  document.getElementById('pp-fill').style.width=pct+'%';
-  document.getElementById('pp-label').textContent=lbl;
-}
-function showResult(type,html){
-  const r=document.getElementById('result-box'); r.className='result-box '+type; r.innerHTML=html; r.style.display='block';
-}
-
-// ── UTILS ──
+function setPP(pct,lbl){document.getElementById('pp-fill').style.width=pct+'%';document.getElementById('pp-label').textContent=lbl;}
+function showResult(type,html){const r=document.getElementById('result-box');r.className='result-box '+type;r.innerHTML=html;r.style.display='block';}
 function readBytes(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsArrayBuffer(f);});}
 function arrayBufferToBase64(buf){const b=new Uint8Array(buf);let s='';for(let i=0;i<b.byteLength;i++)s+=String.fromCharCode(b[i]);return btoa(s);}
 function esc(s){return(s||'').replace(/'/g,"\\'").replace(/</g,'&lt;').replace(/>/g,'&gt;');}
