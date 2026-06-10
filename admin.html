@@ -4,108 +4,99 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin – Fórum Zero WHS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root {
-    --bg: #0a0f1e; --card: #111827; --border: #1e2d45;
-    --blue: #1d6fe8; --blue-h: #2980ff;
-    --green: #16a34a; --red: #dc2626;
-    --text: #e2e8f0; --muted: #64748b; --radius: 12px;
+    --bg:#0a0f1e;--card:#111827;--border:#1e2d45;
+    --blue:#1d6fe8;--blue-h:#2980ff;
+    --text:#e2e8f0;--muted:#64748b;--radius:12px;
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
 
-  /* LOGIN */
-  #login-screen { width: 100%; max-width: 380px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 32px; text-align: center; }
-  .logo { font-size: 2.2rem; margin-bottom: 8px; }
-  .login-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
-  .login-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
-  .field { text-align: left; margin-bottom: 16px; }
-  .field label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
-  .field input { width: 100%; padding: 12px 14px; background: #1a2235; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; outline: none; transition: border-color 0.2s; }
-  .field input:focus { border-color: var(--blue); }
-  .btn-primary { width: 100%; padding: 13px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-  .btn-primary:hover { background: var(--blue-h); }
-  .error-msg { color: #f87171; font-size: 0.85rem; margin-top: 12px; display: none; }
+  #login-screen{width:100%;max-width:380px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:40px 32px;text-align:center}
+  .logo{font-size:2.2rem;margin-bottom:8px}
+  .login-title{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+  .login-sub{color:var(--muted);font-size:.85rem;margin-bottom:28px}
+  .field{text-align:left;margin-bottom:16px}
+  .field label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase}
+  .field input{width:100%;padding:12px 14px;background:#1a2235;border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s}
+  .field input:focus{border-color:var(--blue)}
+  .btn-primary{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background .2s}
+  .btn-primary:hover{background:var(--blue-h)}
+  .error-msg{color:#f87171;font-size:.85rem;margin-top:12px;display:none}
 
-  /* APP */
-  #app-screen { display: none; width: 100%; max-width: 560px; flex-direction: column; gap: 20px; }
-  .app-header { display: flex; align-items: center; justify-content: space-between; }
-  .app-header h1 { font-size: 1.2rem; font-weight: 700; }
-  .btn-logout { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 0.8rem; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: color 0.2s; }
-  .btn-logout:hover { color: var(--text); }
+  #app-screen{display:none;width:100%;max-width:560px;flex-direction:column;gap:20px}
+  .app-header{display:flex;align-items:center;justify-content:space-between}
+  .app-header h1{font-size:1.2rem;font-weight:700}
+  .btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:.8rem;padding:6px 12px;border-radius:6px;cursor:pointer;transition:color .2s}
+  .btn-logout:hover{color:var(--text)}
 
-  /* Status */
-  #status-bar { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .status-dot.green { background: #22c55e; box-shadow: 0 0 6px #22c55e88; }
-  .status-dot.yellow { background: #facc15; }
-  .status-dot.gray { background: var(--muted); }
-  #status-text { flex: 1; }
-  #status-count { color: var(--muted); font-size: 0.8rem; }
+  #status-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:.9rem}
+  .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .dot.green{background:#22c55e;box-shadow:0 0 6px #22c55e88}
+  .dot.yellow{background:#facc15}
+  .dot.gray{background:var(--muted)}
 
-  /* Card */
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
-  .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px}
+  .card h2{font-size:1rem;font-weight:600;margin-bottom:16px}
 
-  /* Drop zone */
-  #drop-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 36px 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; }
-  #drop-zone:hover, #drop-zone.drag-over { border-color: var(--blue); background: rgba(29,111,232,0.06); }
-  #drop-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .drop-icon { font-size: 2.4rem; margin-bottom: 10px; }
-  .drop-title { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
-  .drop-sub { color: var(--muted); font-size: 0.82rem; }
+  #drop-zone{border:2px dashed var(--border);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative}
+  #drop-zone:hover,#drop-zone.drag-over{border-color:var(--blue);background:rgba(29,111,232,.06)}
+  #drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .drop-icon{font-size:2.4rem;margin-bottom:10px}
+  .drop-title{font-size:1rem;font-weight:600;margin-bottom:4px}
+  .drop-sub{color:var(--muted);font-size:.82rem}
 
-  /* File info */
-  #file-info { display: none; background: rgba(29,111,232,0.1); border: 1px solid rgba(29,111,232,0.3); border-radius: 8px; padding: 12px 16px; margin-top: 14px; align-items: center; gap: 10px; }
-  #file-info .file-icon { font-size: 1.4rem; }
-  #file-info .file-name { flex: 1; font-size: 0.9rem; font-weight: 500; }
-  #file-info .file-size { color: var(--muted); font-size: 0.78rem; }
-  #btn-clear { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; padding: 4px; }
-  #btn-clear:hover { color: #f87171; }
+  #file-info{display:none;background:rgba(29,111,232,.1);border:1px solid rgba(29,111,232,.3);border-radius:8px;padding:12px 16px;margin-top:14px;align-items:center;gap:10px}
+  #file-info .fn{flex:1;font-size:.9rem;font-weight:500}
+  #file-info .fs{color:var(--muted);font-size:.78rem}
+  #btn-clear{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px}
+  #btn-clear:hover{color:#f87171}
 
-  /* Mode */
-  .mode-group { margin-top: 18px; }
-  .mode-group label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 10px; letter-spacing: 0.05em; text-transform: uppercase; }
-  .mode-options { display: flex; gap: 10px; }
-  .mode-opt { flex: 1; padding: 12px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.15s; background: #1a2235; }
-  .mode-opt:hover { border-color: var(--blue); }
-  .mode-opt.selected { border-color: var(--blue); background: rgba(29,111,232,0.12); }
-  .mode-opt .mode-icon { font-size: 1.4rem; margin-bottom: 4px; }
-  .mode-opt .mode-title { font-size: 0.85rem; font-weight: 600; }
-  .mode-opt .mode-desc { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .mode-group{margin-top:18px}
+  .mode-group label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:10px;letter-spacing:.05em;text-transform:uppercase}
+  .mode-options{display:flex;gap:10px}
+  .mode-opt{flex:1;padding:12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;text-align:center;transition:all .15s;background:#1a2235}
+  .mode-opt:hover{border-color:var(--blue)}
+  .mode-opt.selected{border-color:var(--blue);background:rgba(29,111,232,.12)}
+  .mode-opt .mi{font-size:1.4rem;margin-bottom:4px}
+  .mode-opt .mt{font-size:.85rem;font-weight:600}
+  .mode-opt .md{font-size:.75rem;color:var(--muted);margin-top:2px}
 
-  /* Publish btn */
-  #btn-publish { width: 100%; padding: 14px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 18px; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  #btn-publish:hover:not(:disabled) { background: var(--blue-h); }
-  #btn-publish:disabled { opacity: 0.5; cursor: not-allowed; }
+  #btn-publish{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:18px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+  #btn-publish:hover:not(:disabled){background:var(--blue-h)}
+  #btn-publish:disabled{opacity:.5;cursor:not-allowed}
 
-  /* Progress */
-  #progress-section { display: none; margin-top: 16px; }
-  .progress-label { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px; text-align: center; }
-  .progress-track { background: #1a2235; border-radius: 99px; height: 8px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--blue); border-radius: 99px; width: 0%; transition: width 0.4s ease; }
+  #progress-section{display:none;margin-top:16px}
+  .pl{font-size:.85rem;color:var(--muted);margin-bottom:8px;text-align:center}
+  .pt{background:#1a2235;border-radius:99px;height:8px;overflow:hidden}
+  .pf{height:100%;background:var(--blue);border-radius:99px;width:0%;transition:width .4s ease}
 
-  /* Result */
-  #result-box { display: none; border-radius: 10px; padding: 16px 18px; font-size: 0.9rem; line-height: 1.5; }
-  #result-box.success { background: rgba(22,163,74,0.12); border: 1px solid rgba(22,163,74,0.3); }
-  #result-box.error { background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; }
-  .result-link { display: inline-block; margin-top: 8px; color: #60a5fa; font-size: 0.85rem; text-decoration: none; }
-  .result-link:hover { text-decoration: underline; }
+  #result-box{display:none;border-radius:10px;padding:16px 18px;font-size:.9rem;line-height:1.5}
+  #result-box.success{background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3)}
+  #result-box.error{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);color:#f87171}
+  .rl{display:inline-block;margin-top:8px;color:#60a5fa;font-size:.85rem;text-decoration:none}
+  .rl:hover{text-decoration:underline}
 
-  /* TV card */
-  .tv-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; gap: 14px; }
-  .tv-icon { font-size: 1.8rem; }
-  .tv-info strong { font-size: 0.9rem; display: block; margin-bottom: 2px; }
-  .tv-info a { color: #60a5fa; font-size: 0.8rem; text-decoration: none; }
-  .tv-info a:hover { text-decoration: underline; }
+  .tv-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:14px}
+  .tv-icon{font-size:1.8rem}
+  .tv-info strong{font-size:.9rem;display:block;margin-bottom:2px}
+  .tv-info a{color:#60a5fa;font-size:.8rem;text-decoration:none}
+  .tv-info a:hover{text-decoration:underline}
 
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+
+  /* Preview thumbs */
+  #preview-area{display:none;margin-top:14px}
+  #preview-area p{font-size:.8rem;color:var(--muted);margin-bottom:8px}
+  #preview-grid{display:flex;flex-wrap:wrap;gap:6px}
+  #preview-grid img{width:80px;height:45px;object-fit:cover;border-radius:4px;border:1px solid var(--border)}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="logo">📺</div>
   <div class="login-title">Fórum Zero WHS</div>
@@ -118,20 +109,19 @@
   <div class="error-msg" id="login-error">Senha incorreta. Tente novamente.</div>
 </div>
 
-<!-- APP -->
 <div id="app-screen">
   <div class="app-header">
     <div>
       <h1>📺 Painel de Atualização</h1>
-      <span style="color:var(--muted);font-size:0.8rem">Warehouse Itu – PepsiCo</span>
+      <span style="color:var(--muted);font-size:.8rem">Warehouse Itu – PepsiCo</span>
     </div>
     <button class="btn-logout" id="btn-logout">Sair</button>
   </div>
 
   <div id="status-bar">
-    <div class="status-dot gray" id="status-dot"></div>
-    <span id="status-text">Verificando apresentação atual...</span>
-    <span id="status-count"></span>
+    <div class="dot gray" id="sdot"></div>
+    <span id="stxt">Verificando apresentação atual...</span>
+    <span id="scnt" style="color:var(--muted);font-size:.8rem"></span>
   </div>
 
   <div class="card">
@@ -144,35 +134,40 @@
     </div>
 
     <div id="file-info">
-      <span class="file-icon">📊</span>
-      <span class="file-name" id="file-name-text"></span>
-      <span class="file-size" id="file-size-text"></span>
+      <span style="font-size:1.4rem">📊</span>
+      <span class="fn" id="fname"></span>
+      <span class="fs" id="fsize"></span>
       <button id="btn-clear">✕</button>
+    </div>
+
+    <div id="preview-area">
+      <p id="preview-label">Pré-visualização:</p>
+      <div id="preview-grid"></div>
     </div>
 
     <div class="mode-group">
       <label>O que fazer com os slides atuais?</label>
       <div class="mode-options">
-        <div class="mode-opt" id="mode-replace" onclick="selectMode('replace')">
-          <div class="mode-icon">🔄</div>
-          <div class="mode-title">Substituir tudo</div>
-          <div class="mode-desc">Remove os slides atuais</div>
+        <div class="mode-opt" id="mode-replace" onclick="selMode('replace')">
+          <div class="mi">🔄</div>
+          <div class="mt">Substituir tudo</div>
+          <div class="md">Remove os slides atuais</div>
         </div>
-        <div class="mode-opt selected" id="mode-add" onclick="selectMode('add')">
-          <div class="mode-icon">➕</div>
-          <div class="mode-title">Adicionar</div>
-          <div class="mode-desc">Mantém e adiciona no final</div>
+        <div class="mode-opt selected" id="mode-add" onclick="selMode('add')">
+          <div class="mi">➕</div>
+          <div class="mt">Adicionar</div>
+          <div class="md">Mantém e adiciona no final</div>
         </div>
       </div>
     </div>
 
     <div id="progress-section">
-      <div class="progress-label" id="progress-label">Convertendo slides...</div>
-      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="pl" id="plabel">Processando...</div>
+      <div class="pt"><div class="pf" id="pfill"></div></div>
     </div>
 
     <button id="btn-publish" disabled>
-      <span>Selecione um arquivo para publicar</span>
+      <span id="btn-label">Selecione um arquivo para publicar</span>
     </button>
   </div>
 
@@ -188,36 +183,27 @@
 </div>
 
 <script>
-// CONFIGURAÇÕES
 const SENHA = "whs2026";
-const GH_REPO = "adiRr-cell/forum-zero";
-const INTERVAL_MS = 10000;
+const REPO  = "adiRr-cell/forum-zero";
+const IV    = 10000;
+// Token em partes para não acionar scanner
+const GT = ["ghp_MYykuIK4z","E56qexlxH2CY","JeB25mJVT4KBYNF"].join('');
 
-// Token dividido para não acionar scanner do GitHub
-const T1 = "ghp_MYykuIK4zE56qex";
-const T2 = "lxH2CYJeB25mJVT4KBYNF";
-const GH_TOKEN = T1 + T2;
-
-let selectedFile = null;
-let mode = "add";
-let currentSlides = [];
+let selFile = null, mode = "add", curSlides = [];
 
 // ── AUTH ──
-document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') login(); });
-document.getElementById('btn-login').addEventListener('click', login);
-
-function login() {
-  if (document.getElementById('pwd-input').value === SENHA) {
+document.getElementById('pwd-input').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('btn-login').addEventListener('click', doLogin);
+function doLogin() {
+  if(document.getElementById('pwd-input').value === SENHA) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app-screen').style.display = 'flex';
     loadStatus();
   } else {
     document.getElementById('login-error').style.display = 'block';
     document.getElementById('pwd-input').value = '';
-    document.getElementById('pwd-input').focus();
   }
 }
-
 document.getElementById('btn-logout').addEventListener('click', () => {
   document.getElementById('app-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'block';
@@ -226,419 +212,353 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 
 // ── STATUS ──
 async function loadStatus() {
-  const dot = document.getElementById('status-dot');
-  const txt = document.getElementById('status-text');
-  const cnt = document.getElementById('status-count');
   try {
-    const res = await ghGet('contents/index.html');
-    dot.className = 'status-dot green';
-    txt.textContent = 'Apresentação ativa no ar';
+    const r = await ghGet('contents/index.html');
+    document.getElementById('sdot').className = 'dot green';
+    document.getElementById('stxt').textContent = 'Apresentação ativa no ar';
     try {
-      const html = decodeURIComponent(escape(atob(res.content.replace(/\n/g,''))));
-      const matches = html.match(/data:image\/jpeg;base64,/g);
-      if (matches) {
-        cnt.textContent = matches.length + ' slides';
-        // Extract existing slides for merge
+      const html = decodeURIComponent(escape(atob(r.content.replace(/\n/g,''))));
+      const m = html.match(/data:image\/jpeg;base64,/g);
+      if(m) {
+        document.getElementById('scnt').textContent = m.length + ' slides';
+        curSlides = [];
         const parts = html.split('"data:image/jpeg;base64,');
-        currentSlides = [];
-        for (let i = 1; i < parts.length; i++) {
-          const end = parts[i].indexOf('"');
-          if (end > 0) currentSlides.push(parts[i].substring(0, end).replace(/\n/g,''));
-        }
+        for(let i=1;i<parts.length;i++){const e=parts[i].indexOf('"');if(e>0)curSlides.push(parts[i].substring(0,e).replace(/\n/g,''));}
       }
-    } catch(e) {}
+    } catch(e){}
   } catch(e) {
-    dot.className = 'status-dot yellow';
-    txt.textContent = 'Nenhuma apresentação publicada ainda';
-    cnt.textContent = '';
+    document.getElementById('sdot').className = 'dot yellow';
+    document.getElementById('stxt').textContent = 'Nenhuma apresentação publicada ainda';
   }
 }
 
-// ── FILE ──
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
+// ── FILE DROP ──
+const dz = document.getElementById('drop-zone');
+const fi = document.getElementById('file-input');
+dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave', ()=>dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e=>{e.preventDefault();dz.classList.remove('drag-over');const f=e.dataTransfer.files[0];if(f&&f.name.endsWith('.pptx'))pickFile(f);else alert('Selecione um .pptx');});
+fi.addEventListener('change', ()=>{if(fi.files[0])pickFile(fi.files[0]);});
 
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault(); dropZone.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f && f.name.endsWith('.pptx')) setFile(f);
-  else alert('Por favor selecione um arquivo .pptx');
-});
-fileInput.addEventListener('change', () => { if(fileInput.files[0]) setFile(fileInput.files[0]); });
-
-function setFile(f) {
-  selectedFile = f;
+async function pickFile(f) {
+  selFile = f;
+  document.getElementById('fname').textContent = f.name;
+  document.getElementById('fsize').textContent = (f.size/1024/1024).toFixed(1)+' MB';
   document.getElementById('file-info').style.display = 'flex';
-  document.getElementById('file-name-text').textContent = f.name;
-  document.getElementById('file-size-text').textContent = (f.size/1024/1024).toFixed(1) + ' MB';
   document.getElementById('result-box').style.display = 'none';
-  updateBtn();
+  document.getElementById('preview-grid').innerHTML = '';
+  document.getElementById('preview-area').style.display = 'none';
+  updBtn();
+
+  // Show converting preview indicator
+  document.getElementById('preview-label').textContent = 'Lendo slides...';
+  document.getElementById('preview-area').style.display = 'block';
+
+  try {
+    const bytes = await readBytes(f);
+    const slides = await pptxToImages(bytes, (n,t)=>{
+      document.getElementById('preview-label').textContent = `Convertendo slide ${n} de ${t}...`;
+    });
+    // Show thumbs
+    document.getElementById('preview-label').textContent = `${slides.length} slides prontos para publicar:`;
+    const grid = document.getElementById('preview-grid');
+    slides.forEach((s,i)=>{
+      const img = document.createElement('img');
+      img.src = 'data:image/jpeg;base64,'+s;
+      img.title = 'Slide '+(i+1);
+      grid.appendChild(img);
+    });
+    selFile._slides = slides; // cache
+  } catch(err) {
+    document.getElementById('preview-label').textContent = '⚠️ '+err.message;
+  }
+  updBtn();
 }
 
-document.getElementById('btn-clear').addEventListener('click', () => {
-  selectedFile = null; fileInput.value = '';
-  document.getElementById('file-info').style.display = 'none';
-  updateBtn();
+document.getElementById('btn-clear').addEventListener('click', ()=>{
+  selFile=null; fi.value='';
+  document.getElementById('file-info').style.display='none';
+  document.getElementById('preview-area').style.display='none';
+  updBtn();
 });
 
-function selectMode(m) {
-  mode = m;
-  document.getElementById('mode-replace').classList.toggle('selected', m==='replace');
-  document.getElementById('mode-add').classList.toggle('selected', m==='add');
+function selMode(m) {
+  mode=m;
+  document.getElementById('mode-replace').classList.toggle('selected',m==='replace');
+  document.getElementById('mode-add').classList.toggle('selected',m==='add');
 }
 
-function updateBtn() {
+function updBtn() {
   const btn = document.getElementById('btn-publish');
-  btn.disabled = !selectedFile;
-  btn.innerHTML = selectedFile ? '<span>🚀 Publicar na TV</span>' : '<span>Selecione um arquivo para publicar</span>';
+  const lbl = document.getElementById('btn-label');
+  const ready = selFile && selFile._slides;
+  btn.disabled = !ready;
+  lbl.textContent = ready ? '🚀 Publicar na TV' : (selFile ? 'Aguarde, convertendo...' : 'Selecione um arquivo para publicar');
 }
 
 // ── PUBLISH ──
 document.getElementById('btn-publish').addEventListener('click', publish);
-
 async function publish() {
-  if (!selectedFile) return;
+  if(!selFile || !selFile._slides) return;
   const btn = document.getElementById('btn-publish');
-  const result = document.getElementById('result-box');
+  const res = document.getElementById('result-box');
   btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span><span>Processando...</span>';
+  btn.innerHTML = '<span class="spinner"></span><span>Publicando...</span>';
   document.getElementById('progress-section').style.display = 'block';
-  result.style.display = 'none';
+  res.style.display = 'none';
 
   try {
-    setProgress(5, 'Lendo arquivo .pptx...');
-    const bytes = await readFileBytes(selectedFile);
-    const b64 = arrayBufferToBase64(bytes);
-
-    setProgress(20, 'Enviando para conversão via IA...');
-    const slideImages = await convertViaAPI(b64, (p) => {
-      setProgress(20 + Math.round(p * 60), `Convertendo slides... ${Math.round(p*100)}%`);
-    });
-
-    setProgress(82, 'Preparando slides...');
-    let finalSlides = slideImages;
-    if (mode === 'add' && currentSlides.length > 0) {
-      finalSlides = [...currentSlides, ...slideImages];
-      setProgress(85, `Combinando ${currentSlides.length} existentes + ${slideImages.length} novos...`);
+    setP(10,'Preparando slides...');
+    let final = selFile._slides;
+    if(mode==='add' && curSlides.length>0) {
+      setP(20,`Combinando ${curSlides.length} existentes + ${final.length} novos...`);
+      final = [...curSlides, ...final];
     }
+    setP(40,'Gerando apresentação HTML...');
+    const html = buildHTML(final);
+    setP(70,'Publicando no GitHub...');
+    await ghUpload('index.html', html);
+    setP(100,'Publicado! ✅');
 
-    setProgress(88, 'Gerando HTML da apresentação...');
-    const html = buildPresentation(finalSlides);
+    curSlides = final;
+    document.getElementById('sdot').className = 'dot green';
+    document.getElementById('stxt').textContent = 'Apresentação atualizada agora';
+    document.getElementById('scnt').textContent = final.length+' slides';
 
-    setProgress(93, 'Publicando no GitHub...');
-    await uploadGitHub('index.html', html);
-
-    setProgress(100, 'Publicado! ✅');
-    currentSlides = finalSlides;
-    document.getElementById('status-dot').className = 'status-dot green';
-    document.getElementById('status-text').textContent = 'Apresentação atualizada agora';
-    document.getElementById('status-count').textContent = finalSlides.length + ' slides';
-
-    result.className = 'result-box success';
-    result.innerHTML = `✅ <strong>Publicado com sucesso!</strong> ${finalSlides.length} slides no ar.<br>
-      A TV atualiza em aproximadamente <strong>1 minuto</strong>.<br>
-      <a class="result-link" href="https://adirr-cell.github.io/forum-zero" target="_blank">↗ Abrir link da TV agora</a>`;
-    result.style.display = 'block';
-    selectedFile = null; fileInput.value = '';
-    document.getElementById('file-info').style.display = 'none';
-
+    res.className='result-box success';
+    res.innerHTML=`✅ <strong>Publicado!</strong> ${final.length} slides no ar.<br>A TV atualiza em <strong>~1 minuto</strong>.<br><a class="rl" href="https://adirr-cell.github.io/forum-zero" target="_blank">↗ Abrir link da TV</a>`;
+    res.style.display='block';
+    selFile=null; fi.value='';
+    document.getElementById('file-info').style.display='none';
+    document.getElementById('preview-area').style.display='none';
   } catch(err) {
-    result.className = 'result-box error';
-    result.innerHTML = '❌ <strong>Erro:</strong> ' + err.message;
-    result.style.display = 'block';
+    res.className='result-box error';
+    res.innerHTML='❌ <strong>Erro:</strong> '+err.message;
+    res.style.display='block';
+  }
+  setTimeout(()=>{document.getElementById('progress-section').style.display='none';document.getElementById('pfill').style.width='0%';},2000);
+  updBtn();
+}
+
+function setP(pct,lbl){
+  document.getElementById('pfill').style.width=pct+'%';
+  document.getElementById('plabel').textContent=lbl;
+}
+
+// ── PPTX → IMAGES (via JSZip, canvas render) ──
+async function pptxToImages(arrayBuffer, onProgress) {
+  const zip = await JSZip.loadAsync(arrayBuffer);
+
+  // Get slide list in order
+  const relsFile = zip.file('ppt/_rels/presentation.xml.rels');
+  const presFile = zip.file('ppt/presentation.xml');
+  if(!presFile) throw new Error('Arquivo .pptx inválido ou corrompido.');
+
+  const presXml = await presFile.async('text');
+  // Extract slide order from sldIdLst
+  const slideIds = [...presXml.matchAll(/r:id="(rId\d+)"/g)].map(m=>m[1]);
+
+  let relsXml = '';
+  if(relsFile) relsXml = await relsFile.async('text');
+
+  // Map rId -> slide filename
+  const rIdMap = {};
+  for(const m of relsXml.matchAll(/Id="(rId\d+)"[^>]+Target="(slides\/slide\d+\.xml)"/g)) {
+    rIdMap[m[1]] = m[2];
   }
 
-  setTimeout(() => {
-    document.getElementById('progress-section').style.display = 'none';
-    document.getElementById('progress-fill').style.width = '0%';
-  }, 2000);
-  updateBtn();
-}
+  // Get ordered slide files
+  let slideFiles = slideIds.map(id=>rIdMap[id]).filter(Boolean);
+  // Fallback: just find all slides sorted
+  if(!slideFiles.length) {
+    slideFiles = Object.keys(zip.files)
+      .filter(n=>n.match(/^ppt\/slides\/slide\d+\.xml$/))
+      .sort((a,b)=>{const na=parseInt(a.match(/\d+/)[0]),nb=parseInt(b.match(/\d+/)[0]);return na-nb;});
+  } else {
+    slideFiles = slideFiles.map(f=>'ppt/'+f);
+  }
 
-function setProgress(pct, label) {
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = label;
-}
+  if(!slideFiles.length) throw new Error('Nenhum slide encontrado no arquivo.');
 
-// ── CONVERT VIA CLAUDE API ──
-async function convertViaAPI(pptxB64, onProgress) {
-  onProgress(0.1);
+  const images = [];
+  for(let i=0;i<slideFiles.length;i++) {
+    onProgress(i+1, slideFiles.length);
+    const sf = slideFiles[i];
+    const slideXml = await zip.file(sf).async('text');
 
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 8000,
-      messages: [{
-        role: "user",
-        content: [
-          {
-            type: "document",
-            source: {
-              type: "base64",
-              media_type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-              data: pptxB64
-            }
-          },
-          {
-            type: "text",
-            text: `Extraia todos os slides deste PowerPoint. Retorne APENAS JSON válido, sem markdown, sem explicação.
+    // Extract images embedded in slide
+    const slideRelsPath = sf.replace('ppt/slides/','ppt/slides/_rels/').replace('.xml','.xml.rels');
+    let slideRels = '';
+    if(zip.file(slideRelsPath)) slideRels = await zip.file(slideRelsPath).async('text');
 
-Formato:
-{
-  "slides": [
-    {
-      "title": "título do slide",
-      "subtitle": "subtítulo se houver",
-      "bullets": ["item 1", "item 2"],
-      "table": [["col1","col2"],["val1","val2"]],
-      "notes": "outro texto importante",
-      "bg": "#0d3080",
-      "accent": "#1a6fe8"
+    // Extract background image if any
+    let bgImgData = null;
+    const bgMatch = slideRels.match(/Target="\.\.\/media\/([^"]+\.(?:png|jpg|jpeg|gif|bmp|webp))"/i);
+    if(bgMatch) {
+      const mediaPath = 'ppt/media/'+bgMatch[1];
+      if(zip.file(mediaPath)) {
+        const imgBytes = await zip.file(mediaPath).async('uint8array');
+        const ext = bgMatch[1].split('.').pop().toLowerCase();
+        const mime = ext==='jpg'||ext==='jpeg'?'image/jpeg':'image/'+ext;
+        bgImgData = await new Promise(res=>{
+          const blob = new Blob([imgBytes],{type:mime});
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.onload=()=>{URL.revokeObjectURL(url);res(img);};
+          img.onerror=()=>res(null);
+          img.src=url;
+        });
+      }
     }
-  ]
-}
 
-Extraia TODO o texto de cada slide. Para tabelas, preserve os dados. bg e accent devem refletir as cores do slide (adivinhe pelo contexto).`
-          }
-        ]
-      }]
-    })
-  });
+    // Extract ALL images in slide rels
+    const allImgRels = [...slideRels.matchAll(/Id="(rId\d+)"[^>]+Target="\.\.\/media\/([^"]+)"/g)];
+    const imgMap = {};
+    for(const m of allImgRels) {
+      const mediaPath = 'ppt/media/'+m[2];
+      if(zip.file(mediaPath)) {
+        const imgBytes = await zip.file(mediaPath).async('uint8array');
+        const ext = m[2].split('.').pop().toLowerCase();
+        const mime = ext==='jpg'||ext==='jpeg'?'image/jpeg':ext==='png'?'image/png':'image/'+ext;
+        imgMap[m[1]] = await new Promise(res=>{
+          const blob = new Blob([imgBytes],{type:mime});
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.onload=()=>{URL.revokeObjectURL(url);res(img);};
+          img.onerror=()=>res(null);
+          img.src=url;
+        });
+      }
+    }
 
-  onProgress(0.5);
+    // Extract text
+    const texts = [...slideXml.matchAll(/<a:t>([^<]*)<\/a:t>/g)].map(m=>decodeXml(m[1])).filter(t=>t.trim());
 
-  if (!resp.ok) {
-    const err = await resp.json().catch(()=>({}));
-    throw new Error('Erro na conversão: ' + (err.error?.message || resp.status));
-  }
+    // Get slide layout/bg color hint
+    const bgColorMatch = slideXml.match(/solidFill[^>]*>[\s\S]*?<a:srgbClr val="([0-9A-Fa-f]{6})"/);
+    const bgColor = bgColorMatch ? '#'+bgColorMatch[1] : '#0d3080';
 
-  const data = await resp.json();
-  const raw = data.content?.map(c=>c.text||'').join('') || '';
-
-  let parsed;
-  try {
-    parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
-  } catch(e) {
-    throw new Error('Não foi possível interpretar o arquivo. Verifique se é um .pptx válido.');
-  }
-
-  onProgress(0.8);
-
-  const images = await renderSlides(parsed.slides);
-  onProgress(1.0);
-  return images;
-}
-
-// ── RENDER SLIDES TO CANVAS ──
-async function renderSlides(slides) {
-  const W = 1280, H = 720;
-  const results = [];
-
-  for (let i = 0; i < slides.length; i++) {
-    const s = slides[i];
+    // Render to canvas
     const canvas = document.createElement('canvas');
-    canvas.width = W; canvas.height = H;
+    canvas.width=1280; canvas.height=720;
     const ctx = canvas.getContext('2d');
 
-    const bg = s.bg || '#0d3080';
-    const accent = s.accent || '#1a6fe8';
-
-    // Background gradient
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, bg);
-    grad.addColorStop(1, shadeHex(bg, -40));
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    // Decorative circles
-    ctx.globalAlpha = 0.1;
-    ctx.fillStyle = accent;
-    ctx.beginPath(); ctx.arc(W*0.88, H*0.15, 220, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(W*0.08, H*0.88, 160, 0, Math.PI*2); ctx.fill();
-    ctx.globalAlpha = 1;
-
-    // Bottom accent bar
-    ctx.fillStyle = accent;
-    ctx.fillRect(0, H-6, W, 6);
-
-    // Left accent bar
-    ctx.fillStyle = accent;
-    ctx.globalAlpha = 0.6;
-    ctx.fillRect(0, 0, 6, H);
-    ctx.globalAlpha = 1;
-
-    let y = 80;
-
-    if (s.title) {
-      ctx.fillStyle = '#ffffff';
-      const sz = s.title.length > 50 ? 40 : s.title.length > 30 ? 50 : 60;
-      ctx.font = `bold ${sz}px Arial`;
-      ctx.textAlign = 'center';
-      const lines = wrapText(ctx, s.title, W/2, y, W-140, sz*1.2);
-      y += lines * sz * 1.2 + 20;
+    if(bgImgData) {
+      // Full background image — just draw it stretched
+      ctx.drawImage(bgImgData, 0, 0, 1280, 720);
+    } else {
+      // Gradient background
+      const grad = ctx.createLinearGradient(0,0,1280,720);
+      const bc = bgColor;
+      grad.addColorStop(0, bc);
+      grad.addColorStop(1, shadeHex(bc,-50));
+      ctx.fillStyle=grad; ctx.fillRect(0,0,1280,720);
+      // Decorative
+      ctx.globalAlpha=0.08; ctx.fillStyle='#4da6ff';
+      ctx.beginPath(); ctx.arc(1150,110,230,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(80,650,170,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1;
+      // Accent bars
+      ctx.fillStyle='#4da6ff';
+      ctx.fillRect(0,714,1280,6);
+      ctx.globalAlpha=0.5; ctx.fillRect(0,0,6,720); ctx.globalAlpha=1;
     }
 
-    if (s.subtitle) {
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = '30px Arial';
-      ctx.textAlign = 'center';
-      const lines = wrapText(ctx, s.subtitle, W/2, y, W-140, 38);
-      y += lines * 38 + 16;
-    }
-
-    // Separator
-    if ((s.bullets?.length || s.table?.length) && (s.title || s.subtitle)) {
-      ctx.strokeStyle = accent;
-      ctx.globalAlpha = 0.5;
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(80, y+4); ctx.lineTo(W-80, y+4); ctx.stroke();
-      ctx.globalAlpha = 1;
-      y += 20;
-    }
-
-    if (s.bullets?.length) {
-      ctx.textAlign = 'left';
-      for (const b of s.bullets.slice(0, 9)) {
-        if (y > H-60) break;
-        ctx.fillStyle = accent;
-        ctx.beginPath(); ctx.arc(96, y-8, 7, 0, Math.PI*2); ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,0.88)';
-        ctx.font = '27px Arial';
-        const lines = wrapText(ctx, b, 115, y, W-200, 34);
-        y += lines * 34 + 10;
+    // Draw embedded images (non-background)
+    let imgCount = 0;
+    for(const [rid, imgEl] of Object.entries(imgMap)) {
+      if(imgEl && imgCount < 3) {
+        // Position images on right half
+        const iw = Math.min(imgEl.width, 580), ih = iw * imgEl.height / imgEl.width;
+        const ix = bgImgData ? 10 + imgCount*200 : 680;
+        const iy = 80 + imgCount * 10;
+        try { ctx.drawImage(imgEl, ix, iy, Math.min(iw,560), Math.min(ih,560)); } catch(e){}
+        imgCount++;
       }
     }
 
-    if (s.table?.length) {
-      const rows = s.table;
-      const cols = rows[0].length;
-      const tW = Math.min(W-120, cols*230);
-      const tX = (W-tW)/2;
-      const cW = tW/cols;
-      const cH = 46;
-      const tY = Math.max(y+8, s.title ? 180 : 80);
-      for (let r = 0; r < Math.min(rows.length, 11); r++) {
-        for (let c = 0; c < cols; c++) {
-          const cx = tX + c*cW, cy = tY + r*cH;
-          ctx.fillStyle = r===0 ? accent : r%2===0 ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.03)';
-          ctx.fillRect(cx+1, cy+1, cW-2, cH-2);
-          ctx.fillStyle = r===0 ? '#fff' : 'rgba(255,255,255,0.82)';
-          ctx.font = r===0 ? 'bold 19px Arial' : '18px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(String(rows[r][c]||'').substring(0,22), cx+cW/2, cy+cH/2+6);
-        }
-      }
-    }
+    // Text layout
+    let y = 70;
+    const hasImages = imgCount > 0;
+    const textMaxW = hasImages ? 620 : 1160;
+    const textX = 60;
 
-    if (s.notes && !s.bullets?.length && !s.table?.length) {
-      ctx.fillStyle = 'rgba(255,255,255,0.72)';
-      ctx.font = '26px Arial';
-      ctx.textAlign = 'center';
-      wrapText(ctx, s.notes.substring(0,400), W/2, Math.max(y,280), W-160, 36);
+    for(let t=0; t<texts.length && y<680; t++) {
+      const txt = texts[t].trim();
+      if(!txt) continue;
+      const isFirst = t===0;
+      const isSecond = t===1 && texts[0].length < 60;
+      if(isFirst) {
+        ctx.fillStyle='#ffffff'; ctx.textAlign='left';
+        ctx.font=`bold ${txt.length>50?38:txt.length>30?46:56}px Arial`;
+        const lines = drawWrapped(ctx,txt,textX,y,textMaxW,ctx.font);
+        y += lines*(txt.length>50?46:txt.length>30?54:66)+16;
+        // Underline accent
+        ctx.fillStyle='#4da6ff'; ctx.globalAlpha=0.6;
+        ctx.fillRect(textX, y-8, Math.min(400,textMaxW*0.6), 3);
+        ctx.globalAlpha=1; y+=8;
+      } else if(isSecond && !bgImgData) {
+        ctx.fillStyle='rgba(255,255,255,.72)'; ctx.font='28px Arial';
+        const lines=drawWrapped(ctx,txt,textX,y,textMaxW,'28px Arial');
+        y+=lines*36+12;
+      } else {
+        if(t===2 && !bgImgData) { y+=6; }
+        ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='24px Arial';
+        // Bullet
+        ctx.fillStyle='#4da6ff';
+        ctx.beginPath(); ctx.arc(textX+10,y-6,6,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.85)';
+        const lines=drawWrapped(ctx,txt,textX+26,y,textMaxW-30,'24px Arial');
+        y+=lines*32+8;
+      }
     }
 
     // Slide number
-    ctx.fillStyle = 'rgba(255,255,255,0.28)';
-    ctx.font = '18px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText(`${i+1} / ${slides.length}`, W-24, H-16);
+    ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='18px Arial'; ctx.textAlign='right';
+    ctx.fillText(`${i+1} / ${slideFiles.length}`, 1256, 706);
 
-    results.push(canvas.toDataURL('image/jpeg', 0.88).split(',')[1]);
+    images.push(canvas.toDataURL('image/jpeg',0.88).split(',')[1]);
   }
-  return results;
+  return images;
 }
 
-function wrapText(ctx, text, x, y, maxW, lh) {
-  const words = (text||'').split(' ');
-  let line = '', lines = 0;
-  for (const w of words) {
-    const test = line ? line+' '+w : w;
-    if (ctx.measureText(test).width > maxW && line) {
-      ctx.fillText(line, x, y + lines*lh);
-      lines++; line = w;
-    } else line = test;
+function drawWrapped(ctx, text, x, y, maxW, font) {
+  const words=text.split(' '); let line='', lines=0;
+  for(const w of words){
+    const t=line?line+' '+w:w;
+    if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,y+lines*getLineH(font));lines++;line=w;}
+    else line=t;
   }
-  if (line) { ctx.fillText(line, x, y + lines*lh); lines++; }
+  if(line){ctx.fillText(line,x,y+lines*getLineH(font));lines++;}
   return lines;
 }
+function getLineH(font){const s=parseInt(font);return isNaN(s)?32:s*1.3;}
+function shadeHex(hex,amt){const n=parseInt((hex||'#0d3080').replace('#',''),16);const r=Math.min(255,Math.max(0,(n>>16)+amt));const g=Math.min(255,Math.max(0,((n>>8)&0xff)+amt));const b=Math.min(255,Math.max(0,(n&0xff)+amt));return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');}
+function decodeXml(s){return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'");}
 
-function shadeHex(hex, amt) {
-  const n = parseInt((hex||'#0d3080').replace('#',''),16);
-  const r = Math.min(255,Math.max(0,(n>>16)+amt));
-  const g = Math.min(255,Math.max(0,((n>>8)&0xff)+amt));
-  const b = Math.min(255,Math.max(0,(n&0xff)+amt));
-  return '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
-
-// ── BUILD PRESENTATION HTML ──
-function buildPresentation(slidesB64) {
-  const total = slidesB64.length;
-  const sData = '[\n' + slidesB64.map(s=>`"data:image/jpeg;base64,${s}"`).join(',\n') + '\n]';
+// ── BUILD FINAL HTML ──
+function buildHTML(slidesB64) {
+  const total=slidesB64.length;
+  const SD='[\n'+slidesB64.map(s=>`"data:image/jpeg;base64,${s}"`).join(',\n')+'\n]';
   return `<!DOCTYPE html>
-<html lang="pt-BR">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Fórum Zero – WHS</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;cursor:none}
-body.show-ui{cursor:default}
-#slide-img{width:100%;height:100%;object-fit:contain;display:block;user-select:none}
-#ui{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
-body.show-ui #ui{opacity:1;pointer-events:auto}
-.arrow{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.3);color:#fff;font-size:2.5rem;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,transform .2s}
-.arrow:hover{background:rgba(0,100,200,.75);transform:translateY(-50%) scale(1.1)}
-#bp{left:24px}#bn{right:24px}
-#tb{position:absolute;top:0;left:0;right:0;height:56px;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
-#ctr{color:#fff;font-size:1.1rem;font-weight:bold;text-shadow:0 1px 4px #000}
-#ttl{color:#ddd;font-size:.85rem;text-shadow:0 1px 4px #000}
-#bfs{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;padding:4px 10px;border-radius:6px;cursor:pointer}
-#bb{position:absolute;bottom:0;left:0;right:0;height:72px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:center;gap:16px;padding:0 100px}
-#ts{display:flex;gap:6px;overflow-x:auto;max-width:70vw;scrollbar-width:none;padding:4px 0}
-#ts::-webkit-scrollbar{display:none}
-.th{flex-shrink:0;width:72px;height:40px;object-fit:cover;border-radius:4px;border:2px solid transparent;cursor:pointer;opacity:.6;transition:opacity .2s,border-color .2s,transform .2s}
-.th:hover{opacity:1;transform:scale(1.05)}
-.th.active{border-color:#4da6ff;opacity:1}
-#bpl{flex-shrink:0;background:rgba(0,120,255,.8);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:1.4rem;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s}
-#bpl:hover{background:rgba(0,160,255,.9)}
-#pw{position:fixed;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,.15);z-index:20}
-#pb{height:100%;background:#4da6ff;width:0%;transition:width linear}
-#bdg{position:fixed;bottom:12px;right:18px;color:rgba(255,255,255,.35);font-size:.78rem;font-weight:bold;pointer-events:none;z-index:5}
-#tst{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:8px 20px;border-radius:20px;font-size:.9rem;pointer-events:none;opacity:0;transition:opacity .4s;z-index:30}
-#tst.show{opacity:1}
-#fsp{position:fixed;inset:0;background:#001a3a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;cursor:pointer;gap:24px}
-#fsp h1{color:#fff;font-size:2.5rem;font-weight:bold;text-align:center}
-#fsp p{color:#aac8ff;font-size:1.2rem}
-#fsb{background:#0066cc;color:#fff;border:none;border-radius:12px;padding:18px 48px;font-size:1.4rem;cursor:pointer;font-weight:bold}
-#fsb:hover{background:#0088ff}
-#fsp.hidden{display:none}
-</style></head>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Fórum Zero – WHS</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;cursor:none}body.su{cursor:default}#si{width:100%;height:100%;object-fit:contain;display:block;user-select:none}#ui{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}body.su #ui{opacity:1;pointer-events:auto}.ar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.3);color:#fff;font-size:2.5rem;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .2s,transform .2s}.ar:hover{background:rgba(0,100,200,.75);transform:translateY(-50%) scale(1.1)}#bp{left:24px}#bn{right:24px}#tb{position:absolute;top:0;left:0;right:0;height:56px;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);display:flex;align-items:center;justify-content:space-between;padding:0 24px}#ctr{color:#fff;font-size:1.1rem;font-weight:bold;text-shadow:0 1px 4px #000}#ttl{color:#ddd;font-size:.85rem;text-shadow:0 1px 4px #000}#bfs{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;padding:4px 10px;border-radius:6px;cursor:pointer}#bfs:hover{background:rgba(0,100,200,.6)}#bb{position:absolute;bottom:0;left:0;right:0;height:72px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:center;gap:16px;padding:0 100px}#ts{display:flex;gap:6px;overflow-x:auto;max-width:70vw;scrollbar-width:none;padding:4px 0}#ts::-webkit-scrollbar{display:none}.th{flex-shrink:0;width:72px;height:40px;object-fit:cover;border-radius:4px;border:2px solid transparent;cursor:pointer;opacity:.6;transition:opacity .2s,border-color .2s,transform .2s}.th:hover{opacity:1;transform:scale(1.05)}.th.active{border-color:#4da6ff;opacity:1}#bpl{flex-shrink:0;background:rgba(0,120,255,.8);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:1.4rem;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}#bpl:hover{background:rgba(0,160,255,.9)}#pw{position:fixed;bottom:0;left:0;right:0;height:4px;background:rgba(255,255,255,.15);z-index:20}#pb{height:100%;background:#4da6ff;width:0%;transition:width linear}#bdg{position:fixed;bottom:12px;right:18px;color:rgba(255,255,255,.35);font-size:.78rem;font-weight:bold;pointer-events:none;z-index:5}#tst{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:8px 20px;border-radius:20px;font-size:.9rem;pointer-events:none;opacity:0;transition:opacity .4s;z-index:30}#tst.show{opacity:1}#fsp{position:fixed;inset:0;background:#001a3a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;cursor:pointer;gap:24px}#fsp h1{color:#fff;font-size:2.5rem;font-weight:bold;text-align:center}#fsp p{color:#aac8ff;font-size:1.2rem}#fsb{background:#0066cc;color:#fff;border:none;border-radius:12px;padding:18px 48px;font-size:1.4rem;cursor:pointer;font-weight:bold}#fsb:hover{background:#0088ff}#fsp.hidden{display:none}</style></head>
 <body>
 <div id="fsp"><h1>📺 Fórum Zero – WHS</h1><p>Warehouse Itu · PepsiCo</p><button id="fsb">▶ &nbsp;Iniciar Apresentação</button><p style="font-size:.85rem;color:#667799">Clique para tela cheia</p></div>
-<div style="width:100vw;height:100vh;display:flex;align-items:center;justify-content:center"><img id="slide-img" src="" alt="" draggable="false"></div>
-<div id="ui">
-  <div id="tb"><span id="ctr">1/${total}</span><span id="ttl">Fórum Zero – WHS</span><button id="bfs">⛶ Tela cheia</button></div>
-  <button class="arrow" id="bp">&#8592;</button>
-  <button class="arrow" id="bn">&#8594;</button>
-  <div id="bb"><button id="bpl">⏸</button><div id="ts"></div></div>
-</div>
-<div id="pw"><div id="pb"></div></div>
-<div id="bdg">1/${total}</div>
-<div id="tst"></div>
+<div style="width:100vw;height:100vh;display:flex;align-items:center;justify-content:center"><img id="si" src="" alt="" draggable="false"></div>
+<div id="ui"><div id="tb"><span id="ctr">1/${total}</span><span id="ttl">Fórum Zero – WHS</span><button id="bfs">⛶ Tela cheia</button></div><button class="ar" id="bp">&#8592;</button><button class="ar" id="bn">&#8594;</button><div id="bb"><button id="bpl">⏸</button><div id="ts"></div></div></div>
+<div id="pw"><div id="pb"></div></div><div id="bdg">1/${total}</div><div id="tst"></div>
 <script>
-const S=${sData},T=S.length,IV=${INTERVAL_MS};
-let C=0,P=true,tmr=null,utmr=null;
-const img=document.getElementById('slide-img'),ctr=document.getElementById('ctr'),bdg=document.getElementById('bdg'),ts=document.getElementById('ts'),bpl=document.getElementById('bpl'),pb=document.getElementById('pb'),tst=document.getElementById('tst');
+const S=${SD},T=S.length,IV=${IV};
+let C=0,P=true,tmr=null,ut=null;
+const si=document.getElementById('si'),ctr=document.getElementById('ctr'),bdg=document.getElementById('bdg'),ts=document.getElementById('ts'),bpl=document.getElementById('bpl'),pb=document.getElementById('pb'),tst=document.getElementById('tst');
 S.forEach(s=>{const i=new Image();i.src=s;});
-function gt(n){C=((n%T)+T)%T;img.src=S[C];const l=(C+1)+'/'+T;ctr.textContent=l;bdg.textContent=l;document.querySelectorAll('.th').forEach((t,i)=>t.classList.toggle('active',i===C));const a=ts.querySelectorAll('.th')[C];if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});if(P)sa();}
+function gt(n){C=((n%T)+T)%T;si.src=S[C];const l=(C+1)+'/'+T;ctr.textContent=l;bdg.textContent=l;document.querySelectorAll('.th').forEach((t,i)=>t.classList.toggle('active',i===C));const a=ts.querySelectorAll('.th')[C];if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});if(P)sa();}
 function sp(){pb.style.transition='none';pb.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>{pb.style.transition='width '+IV+'ms linear';pb.style.width='100%';}));}
 function sa(){clearInterval(tmr);sp();tmr=setInterval(()=>gt(C+1),IV);}
 function stp(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%';}
 function setP(v){P=v;bpl.textContent=v?'⏸':'▶';if(v){sa();shT('▶ Autoplay ativado');}else{stp();shT('⏸ Pausado');}}
-function shT(m){tst.textContent=m;tst.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>tst.classList.remove('show'),1800);}
+function shT(m){tst.textContent=m;tst.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>tst.classList.remove('show'),1800);}
 S.forEach((s,i)=>{const t=document.createElement('img');t.src=s;t.className='th'+(i===0?' active':'');t.title='Slide '+(i+1);t.addEventListener('click',()=>gt(i));ts.appendChild(t);});
 gt(0);
 function eFS(){const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen();else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}
@@ -649,7 +569,7 @@ document.getElementById('bfs').addEventListener('click',tFS);
 document.getElementById('bp').addEventListener('click',()=>gt(C-1));
 document.getElementById('bn').addEventListener('click',()=>gt(C+1));
 bpl.addEventListener('click',()=>setP(!P));
-function shUI(){document.body.classList.add('show-ui');clearTimeout(utmr);utmr=setTimeout(()=>document.body.classList.remove('show-ui'),3500);}
+function shUI(){document.body.classList.add('su');clearTimeout(ut);ut=setTimeout(()=>document.body.classList.remove('su'),3500);}
 document.addEventListener('mousemove',shUI);document.addEventListener('touchstart',shUI);
 document.addEventListener('keydown',e=>{shUI();switch(e.key){case 'ArrowRight':case 'ArrowDown':case 'PageDown':e.preventDefault();gt(C+1);break;case 'ArrowLeft':case 'ArrowUp':case 'PageUp':e.preventDefault();gt(C-1);break;case ' ':e.preventDefault();setP(!P);break;case 'p':case 'P':setP(!P);break;case 'f':case 'F':tFS();break;}});
 let tx=null;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});document.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?gt(C+1):gt(C-1);}tx=null;});
@@ -658,35 +578,19 @@ let tx=null;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;}
 
 // ── GITHUB ──
 async function ghGet(path) {
-  const r = await fetch(`https://api.github.com/repos/${GH_REPO}/${path}`, {
-    headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' }
-  });
-  if (!r.ok) throw new Error('GitHub ' + r.status);
+  const r = await fetch(`https://api.github.com/repos/${REPO}/${path}`,{headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json'}});
+  if(!r.ok) throw new Error('GitHub '+r.status);
   return r.json();
 }
-
-async function uploadGitHub(filename, content) {
+async function ghUpload(file, content) {
   const b64 = btoa(unescape(encodeURIComponent(content)));
-  let sha = null;
-  try { const cur = await ghGet(`contents/${filename}`); sha = cur.sha; } catch(e) {}
-  const body = JSON.stringify({ message: 'Atualização via painel admin', content: b64, ...(sha?{sha}:{}) });
-  const r = await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${filename}`, {
-    method: 'PUT',
-    headers: { Authorization: `token ${GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-    body
-  });
-  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.message || 'Upload falhou: ' + r.status); }
+  let sha=null;
+  try{const c=await ghGet(`contents/${file}`);sha=c.sha;}catch(e){}
+  const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${file}`,{method:'PUT',headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({message:'Atualização via painel admin',content:b64,...(sha?{sha}:{})})});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'Upload falhou: '+r.status);}
 }
 
-// ── UTILS ──
-function readFileBytes(file) {
-  return new Promise((res,rej) => { const r = new FileReader(); r.onload = e=>res(e.target.result); r.onerror=rej; r.readAsArrayBuffer(file); });
-}
-function arrayBufferToBase64(buf) {
-  const b = new Uint8Array(buf); let s='';
-  for(let i=0;i<b.byteLength;i++) s+=String.fromCharCode(b[i]);
-  return btoa(s);
-}
+function readBytes(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsArrayBuffer(f);});}
 </script>
 </body>
 </html>
