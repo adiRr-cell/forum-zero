@@ -227,13 +227,45 @@ document.getElementById('btn-ok-del').addEventListener('click',async()=>{
   const el=document.getElementById('pi_'+id);
   if(el){el.style.opacity='.4';el.style.pointerEvents='none';}
   try{
-    const r=await fetch(SERVER+'/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
-    const d=await r.json();
-    if(!d.ok)throw new Error(d.error||'Erro');
+    // Delete directly via GitHub - no server needed
+    const stateResp=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/state.json`,
+      {headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json'}});
+    const stateData=await stateResp.json();
+    const currentState=JSON.parse(atob(stateData.content.replace(/\n/g,'')));
+    const list=currentState.presentations||[];
+    const newList=list.filter(p=>p.id!==id);
+    // Save new state
+    const newState=JSON.stringify({presentations:newList.map(p=>({id:p.id,name:p.name,date:p.date,slideCount:p.slideCount,thumb:p.thumb}))});
+    await ghPut('state.json',newState,stateData.sha);
+    // Rebuild TV
+    if(newList.length===0){
+      const emptyHtml=buildEmptyTV();
+      const idxResp=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/index.html`,
+        {headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json'}});
+      const idxData=await idxResp.json();
+      await ghPut('index.html',emptyHtml,idxData.sha);
+    } else {
+      // Need to rebuild with remaining slides - call server
+      await fetch(SERVER+'/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).catch(()=>{});
+    }
     showResult('ok','✅ Apresentação removida. TV atualiza em ~1 min.');
     loadList();
   }catch(e){showResult('fail','❌ '+e.message);loadList();}
 });
+
+function buildEmptyTV(){
+  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Fórum Zero WHS</title><style>*{margin:0;padding:0}body{background:#001a3a;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#fff;font-family:Arial,sans-serif;gap:16px}</style></head><body><div style="font-size:3rem">📺</div><h2>Fórum Zero – WHS</h2><p style="color:#667799">Nenhuma apresentação ativa.</p></body></html>`;
+}
+
+async function ghPut(file,content,sha){
+  const b64=btoa(unescape(encodeURIComponent(content)));
+  const r=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${file}`,{
+    method:'PUT',
+    headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
+    body:JSON.stringify({message:'WHS Admin',content:b64,...(sha?{sha}:{})})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'GitHub error');}
+}
 
 // ── FILE ──
 const dz=document.getElementById('drop-zone'),fi=document.getElementById('file-input');
