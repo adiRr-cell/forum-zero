@@ -33,88 +33,49 @@ body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;he
 #fsp.hidden{display:none}
 </style></head>
 <body>
-
 <div id="fsp">
-  <h1>📺 Fórum Zero – WHS</h1>
-  <p>Warehouse Itu · PepsiCo · 36 slides</p>
+  <h1>📺 WHS – Warehouse Itu</h1>
+  <p>Fórum Zero · Warehouse ITU · 50 slides</p>
   <button id="fsb">▶ &nbsp; Iniciar em Tela Cheia</button>
 </div>
-
 <img id="si" src="" alt="" draggable="false">
 <div id="ui">
-  <div id="tb"><span id="ctr">1/36</span><span id="ttl">Fórum Zero – WHS</span><button id="bfs">⛶ Tela cheia</button></div>
+  <div id="tb"><span id="ctr">1/50</span><span id="ttl">WHS – Warehouse Itu</span><button id="bfs">⛶ Tela cheia</button></div>
   <button class="ar" id="bp">&#8592;</button>
   <button class="ar" id="bn">&#8594;</button>
   <div id="bb"><button id="bpl">⏸</button><div id="ts"></div></div>
 </div>
 <div id="pw"><div id="pb"></div></div>
-<div id="bdg">1/36</div>
+<div id="bdg">1/50</div>
 <div id="tst"></div>
-
 <script>
-const T=36,IV=10000;
-const U=Array.from({length:T},(_,i)=>'https://adirr-cell.github.io/forum-zero/slides/slide_'+(i+1).toString().padStart(2,'0')+'.jpg');
+const T=50,IV=10000;
+const U=["https://adirr-cell.github.io/forum-zero/slides/slide_01.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_02.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_03.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_04.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_05.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_06.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_07.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_08.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_09.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_10.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_11.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_12.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_13.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_14.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_15.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_16.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_17.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_18.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_19.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_20.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_21.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_22.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_23.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_24.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_25.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_26.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_27.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_28.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_29.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_30.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_31.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_32.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_33.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_34.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_35.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_36.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_37.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_38.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_39.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_40.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_41.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_42.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_43.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_44.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_45.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_46.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_47.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_48.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_49.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_50.jpg"];
 let C=0,P=true,tmr=null,ut=null,started=false;
 const si=document.getElementById('si'),ui=document.getElementById('ui');
 const ctr=document.getElementById('ctr'),bdg=document.getElementById('bdg');
 const ts=document.getElementById('ts'),bpl=document.getElementById('bpl');
 const pb=document.getElementById('pb'),tst=document.getElementById('tst');
-const fsp=document.getElementById('fsp');
 
-// Thumbnails
-U.forEach((url,i)=>{
-  const t=document.createElement('img');
-  t.src=url;t.className='th'+(i===0?' active':'');
-  t.addEventListener('click',()=>gt(i));
-  ts.appendChild(t);
-});
+U.forEach((url,i)=>{const t=document.createElement('img');t.src=url;t.className='th'+(i===0?' active':'');t.addEventListener('click',()=>gt(i));ts.appendChild(t);});
 
-function start(){
-  if(started)return;
-  started=true;
-  fsp.classList.add('hidden');
-  si.src=U[0];
-  preload(0);
-  gt(0);
-  setP(true);
-}
-
-function eFS(){
-  const e=document.documentElement;
-  if(e.requestFullscreen)e.requestFullscreen();
-  else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();
-  else if(e.mozRequestFullScreen)e.mozRequestFullScreen();
-  else if(e.msRequestFullscreen)e.msRequestFullscreen();
-}
+function start(){if(started)return;started=true;document.getElementById('fsp').classList.add('hidden');si.src=U[0];preload(0);gt(0);setP(true);}
+function eFS(){const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen();else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}
 function tFS(){if(!document.fullscreenElement&&!document.webkitFullscreenElement)eFS();else if(document.exitFullscreen)document.exitFullscreen();}
-
 document.getElementById('fsb').addEventListener('click',()=>{eFS();start();});
 document.getElementById('fsp').addEventListener('click',e=>{if(e.target!==document.getElementById('fsb')){eFS();start();}});
-
 function preload(n){for(let i=n;i<Math.min(n+4,T);i++)new Image().src=U[i];}
-
-function gt(n){
-  C=((n%T)+T)%T;si.src=U[C];preload(C+1);
-  const l=(C+1)+'/'+T;ctr.textContent=l;bdg.textContent=l;
-  document.querySelectorAll('.th').forEach((t,i)=>t.classList.toggle('active',i===C));
-  const a=ts.querySelectorAll('.th')[C];
-  if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  if(P)sa();
-}
+function gt(n){C=((n%T)+T)%T;si.src=U[C];preload(C+1);const l=(C+1)+'/'+T;ctr.textContent=l;bdg.textContent=l;document.querySelectorAll('.th').forEach((t,i)=>t.classList.toggle('active',i===C));const a=ts.querySelectorAll('.th')[C];if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});if(P)sa();}
 function sa(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>{pb.style.transition='width '+IV+'ms linear';pb.style.width='100%';}));tmr=setInterval(()=>gt(C+1),IV);}
 function stp(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%';}
 function setP(v){P=v;bpl.textContent=v?'⏸':'▶';v?sa():stp();shT(v?'▶ Autoplay':'⏸ Pausado');}
 function shT(m){tst.textContent=m;tst.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>tst.classList.remove('show'),1800);}
 function showUI(){ui.classList.add('show');clearTimeout(ut);ut=setTimeout(()=>ui.classList.remove('show'),3500);}
-
 document.getElementById('bfs').addEventListener('click',tFS);
 document.getElementById('bp').addEventListener('click',()=>{showUI();gt(C-1);});
 document.getElementById('bn').addEventListener('click',()=>{showUI();gt(C+1);});
 bpl.addEventListener('click',()=>{showUI();setP(!P);});
-document.addEventListener('mousemove',showUI);
-document.addEventListener('touchstart',showUI);
+document.addEventListener('mousemove',showUI);document.addEventListener('touchstart',showUI);
 document.addEventListener('keydown',e=>{showUI();switch(e.key){case'ArrowRight':case'PageDown':e.preventDefault();gt(C+1);break;case'ArrowLeft':case'PageUp':e.preventDefault();gt(C-1);break;case' ':e.preventDefault();setP(!P);break;case'f':case'F':tFS();break;}});
-let tx=null;
-document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});
-document.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?gt(C+1):gt(C-1);}tx=null;});
+let tx=null;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});document.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?gt(C+1):gt(C-1);}tx=null;});
 </script></body></html>
