@@ -296,16 +296,16 @@ async function doPublish(){
   try{
     const name=selFile.name.replace(/\.pptx$/i,'');
 
-    // Mandar o pptx direto pro servidor Render (sem passar pelo GitHub)
-    setPP(10,'Lendo arquivo...');
-    const bytes=await readBytes(selFile);
-    const b64=await arrayBufferToBase64Safe(bytes);
+    // Mandar o pptx via FormData (multipart) pro servidor Render
+    setPP(20,'Enviando para conversão...');
+    const formData=new FormData();
+    formData.append('file', selFile, selFile.name);
+    formData.append('name', name);
+    formData.append('action', 'add');
 
-    setPP(30,'Enviando para conversão...');
-    const procResp=await fetch(SERVER+'/convert',{
+    const procResp=await fetch(SERVER+'/upload',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({pptx:b64,name,action:'add'}),
+      body:formData,
       signal:AbortSignal.timeout(300000)
     });
     if(!procResp.ok){
