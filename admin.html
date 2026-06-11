@@ -297,21 +297,23 @@ async function doPublish(){
     const name=selFile.name.replace(/\.pptx$/i,'');
     const ghPath=`uploads/tmp_${Date.now()}.pptx`;
 
-    // Step 1: Upload pptx to GitHub (in chunks if needed)
+    // Step 1: Upload pptx to GitHub
     setPP(10,'Fazendo upload do arquivo...');
     const bytes=await readBytes(selFile);
-    const b64=arrayBufferToBase64(bytes);
+    // Use Uint8Array chunks to avoid btoa stack overflow on large files
+    const b64=await arrayBufferToBase64Safe(bytes);
+    setPP(25,'Enviando para o GitHub...');
 
     // Upload to GitHub
-    const uploadBody=JSON.stringify({message:'Temp upload pptx',content:b64});
+    const uploadPayload={message:'Temp upload pptx',content:b64};
     const uploadResp=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${ghPath}`,{
       method:'PUT',
       headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:uploadBody
+      body:JSON.stringify(uploadPayload)
     });
     if(!uploadResp.ok){
-      const e=await uploadResp.json().catch(()=>({}));
-      throw new Error('Erro no upload: '+(e.message||uploadResp.status));
+      const eData=await uploadResp.json().catch(()=>({}));
+      throw new Error('Erro no upload: '+(eData.message||uploadResp.status));
     }
 
     // Step 2: Ask server to process
@@ -345,6 +347,20 @@ function setPP(pct,lbl){document.getElementById('pp-fill').style.width=pct+'%';d
 function showResult(type,html){const r=document.getElementById('result-box');r.className='result-box '+type;r.innerHTML=html;r.style.display='block';}
 function readBytes(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsArrayBuffer(f);});}
 function arrayBufferToBase64(buf){const b=new Uint8Array(buf);let s='';for(let i=0;i<b.byteLength;i++)s+=String.fromCharCode(b[i]);return btoa(s);}
+async function arrayBufferToBase64Safe(buf){
+  // Safe version using Blob + FileReader - handles large files without stack overflow
+  return new Promise((res,rej)=>{
+    const blob=new Blob([buf]);
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const dataUrl=reader.result;
+      const b64=dataUrl.split(',')[1];
+      res(b64);
+    };
+    reader.onerror=rej;
+    reader.readAsDataURL(blob);
+  });
+}
 function esc(s){return(s||'').replace(/'/g,"\\'").replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>
 </body>
