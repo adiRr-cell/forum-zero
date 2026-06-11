@@ -13,7 +13,6 @@ body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;he
 #tb{position:absolute;top:0;left:0;right:0;height:56px;background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);display:flex;align-items:center;justify-content:space-between;padding:0 24px}
 #ctr{color:#fff;font-size:1.1rem;font-weight:bold}
 #ttl{color:#ddd;font-size:.85rem}
-#bfs{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;padding:6px 12px;border-radius:6px;cursor:pointer}
 #bb{position:absolute;bottom:0;left:0;right:0;height:72px;background:linear-gradient(to top,rgba(0,0,0,.8),transparent);display:flex;align-items:center;justify-content:center;gap:16px;padding:0 100px}
 #ts{display:flex;gap:6px;overflow-x:auto;max-width:70vw;scrollbar-width:none;padding:4px 0}
 #ts::-webkit-scrollbar{display:none}
@@ -25,6 +24,9 @@ body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;he
 #bdg{position:fixed;bottom:12px;right:18px;color:rgba(255,255,255,.35);font-size:.78rem;pointer-events:none;z-index:5}
 #tst{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;padding:8px 20px;border-radius:20px;font-size:.9rem;pointer-events:none;opacity:0;transition:opacity .4s;z-index:30}
 #tst.show{opacity:1}
+/* Botão tela cheia SEMPRE visível */
+#btn-fs-always{position:fixed;top:12px;right:12px;background:rgba(0,0,0,.6);border:2px solid rgba(255,255,255,.4);color:#fff;font-size:1.2rem;padding:8px 14px;border-radius:8px;cursor:pointer;z-index:50;transition:background .2s}
+#btn-fs-always:hover{background:rgba(0,100,200,.8)}
 #fsp{position:fixed;inset:0;background:#001a3a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:24px}
 #fsp h1{color:#fff;font-size:2.5rem;font-weight:bold}
 #fsp p{color:#aac8ff;font-size:1rem}
@@ -38,9 +40,13 @@ body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;he
   <p>Fórum Zero · Warehouse ITU · 50 slides</p>
   <button id="fsb">▶ &nbsp; Iniciar em Tela Cheia</button>
 </div>
+
+<!-- Botão tela cheia sempre visível -->
+<button id="btn-fs-always" onclick="tFS()">⛶ Tela cheia</button>
+
 <img id="si" src="" alt="" draggable="false">
 <div id="ui">
-  <div id="tb"><span id="ctr">1/50</span><span id="ttl">WHS – Warehouse Itu</span><button id="bfs">⛶ Tela cheia</button></div>
+  <div id="tb"><span id="ctr">1/50</span><span id="ttl">WHS – Warehouse Itu</span></div>
   <button class="ar" id="bp">&#8592;</button>
   <button class="ar" id="bn">&#8594;</button>
   <div id="bb"><button id="bpl">⏸</button><div id="ts"></div></div>
@@ -48,9 +54,10 @@ body{background:#000;font-family:Arial,sans-serif;overflow:hidden;width:100vw;he
 <div id="pw"><div id="pb"></div></div>
 <div id="bdg">1/50</div>
 <div id="tst"></div>
+
 <script>
 const T=50,IV=10000;
-const U=["https://adirr-cell.github.io/forum-zero/slides/slide_01.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_02.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_03.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_04.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_05.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_06.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_07.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_08.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_09.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_10.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_11.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_12.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_13.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_14.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_15.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_16.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_17.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_18.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_19.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_20.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_21.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_22.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_23.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_24.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_25.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_26.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_27.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_28.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_29.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_30.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_31.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_32.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_33.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_34.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_35.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_36.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_37.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_38.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_39.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_40.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_41.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_42.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_43.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_44.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_45.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_46.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_47.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_48.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_49.jpg","https://adirr-cell.github.io/forum-zero/slides/slide_50.jpg"];
+const U=Array.from({length:T},(_,i)=>'https://adirr-cell.github.io/forum-zero/slides/slide_'+(i+1).toString().padStart(2,'0')+'.jpg');
 let C=0,P=true,tmr=null,ut=null,started=false;
 const si=document.getElementById('si'),ui=document.getElementById('ui');
 const ctr=document.getElementById('ctr'),bdg=document.getElementById('bdg');
@@ -60,7 +67,7 @@ const pb=document.getElementById('pb'),tst=document.getElementById('tst');
 U.forEach((url,i)=>{const t=document.createElement('img');t.src=url;t.className='th'+(i===0?' active':'');t.addEventListener('click',()=>gt(i));ts.appendChild(t);});
 
 function start(){if(started)return;started=true;document.getElementById('fsp').classList.add('hidden');si.src=U[0];preload(0);gt(0);setP(true);}
-function eFS(){const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen();else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();}
+function eFS(){const e=document.documentElement;if(e.requestFullscreen)e.requestFullscreen();else if(e.webkitRequestFullscreen)e.webkitRequestFullscreen();else if(e.mozRequestFullScreen)e.mozRequestFullScreen();else if(e.msRequestFullscreen)e.msRequestFullscreen();}
 function tFS(){if(!document.fullscreenElement&&!document.webkitFullscreenElement)eFS();else if(document.exitFullscreen)document.exitFullscreen();}
 document.getElementById('fsb').addEventListener('click',()=>{eFS();start();});
 document.getElementById('fsp').addEventListener('click',e=>{if(e.target!==document.getElementById('fsb')){eFS();start();}});
@@ -71,7 +78,6 @@ function stp(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%'
 function setP(v){P=v;bpl.textContent=v?'⏸':'▶';v?sa():stp();shT(v?'▶ Autoplay':'⏸ Pausado');}
 function shT(m){tst.textContent=m;tst.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>tst.classList.remove('show'),1800);}
 function showUI(){ui.classList.add('show');clearTimeout(ut);ut=setTimeout(()=>ui.classList.remove('show'),3500);}
-document.getElementById('bfs').addEventListener('click',tFS);
 document.getElementById('bp').addEventListener('click',()=>{showUI();gt(C-1);});
 document.getElementById('bn').addEventListener('click',()=>{showUI();gt(C+1);});
 bpl.addEventListener('click',()=>{showUI();setP(!P);});
