@@ -5,7 +5,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;overflow:hidden;width:100vw;height:100vh;cursor:none}
 body.su{cursor:default}
-#si{width:100vw;height:100vh;object-fit:contain;position:absolute;top:0;left:0;background:#000}
+#si{width:100vw;height:100vh;object-fit:contain;position:absolute;top:0;left:0;background:#111}
 #ui{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
 body.su #ui{opacity:1;pointer-events:auto}
 .ar{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.3);color:#fff;font-size:2.5rem;width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -28,7 +28,7 @@ body.su #ui{opacity:1;pointer-events:auto}
 #tst.show{opacity:1}
 </style></head>
 <body>
-<img id="si" src="https://adirr-cell.github.io/forum-zero/slides/slide_01.jpg" alt="" draggable="false">
+<img id="si" alt="" draggable="false">
 <div id="ui">
   <div id="tb"><span id="ctr">1/36</span><span id="ttl">Fórum Zero – WHS</span><button id="bfs">⛶ Tela cheia</button></div>
   <button class="ar" id="bp">&#8592;</button>
@@ -39,42 +39,66 @@ body.su #ui{opacity:1;pointer-events:auto}
 <div id="bdg">1/36</div>
 <div id="tst"></div>
 <script>
-const BASE='https://adirr-cell.github.io/forum-zero/slides',T=36,IV=10000;
-const URLS=Array.from({length:T},(_,i)=>BASE+'/slide_'+(i+1).toString().padStart(2,'0')+'.jpg');
+const T=36,IV=10000;
+const U=Array.from({length:T},(_,i)=>'https://adirr-cell.github.io/forum-zero/slides/slide_'+(i+1).toString().padStart(2,'0')+'.jpg');
 let C=0,P=true,tmr=null,ut=null;
 const si=document.getElementById('si'),ctr=document.getElementById('ctr');
 const bdg=document.getElementById('bdg'),ts=document.getElementById('ts');
 const bpl=document.getElementById('bpl'),pb=document.getElementById('pb');
 const tst=document.getElementById('tst');
 
-// Build thumbnails
-URLS.forEach((url,i)=>{
+// Thumbnails
+U.forEach((url,i)=>{
   const t=document.createElement('img');
-  t.src=url;t.className='th'+(i===0?' active':'');
+  t.src=url;
+  t.className='th'+(i===0?' active':'');
   t.addEventListener('click',()=>gt(i));
   ts.appendChild(t);
 });
 
-// Preload next few slides
-function preload(idx){
-  for(let i=idx;i<Math.min(idx+3,T);i++){
-    const img=new Image();img.src=URLS[i];
+// Inicia quando primeiro slide carregar
+si.onload=()=>{
+  if(C===0&&P) sa();
+};
+si.onerror=()=>{
+  // Tenta de novo em 2s
+  setTimeout(()=>{si.src=U[C]+'?t='+Date.now();},2000);
+};
+
+// Mostrar primeiro slide
+si.src=U[0];
+ctr.textContent='1/'+T;
+bdg.textContent='1/'+T;
+
+// Preload próximos 5
+function preload(from){
+  for(let i=from;i<Math.min(from+5,T);i++){
+    new Image().src=U[i];
   }
 }
-preload(0);
-gt(0);
+preload(1);
 
 function gt(n){
   C=((n%T)+T)%T;
-  si.src=URLS[C];
+  si.src=U[C];
   preload(C+1);
-  const l=(C+1)+'/'+T;ctr.textContent=l;bdg.textContent=l;
+  const l=(C+1)+'/'+T;
+  ctr.textContent=l;bdg.textContent=l;
   document.querySelectorAll('.th').forEach((t,i)=>t.classList.toggle('active',i===C));
   const a=ts.querySelectorAll('.th')[C];
   if(a)a.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
   if(P)sa();
 }
-function sa(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>{pb.style.transition='width '+IV+'ms linear';pb.style.width='100%';}));tmr=setInterval(()=>gt(C+1),IV);}
+
+function sa(){
+  clearInterval(tmr);
+  pb.style.transition='none';pb.style.width='0%';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    pb.style.transition='width '+IV+'ms linear';
+    pb.style.width='100%';
+  }));
+  tmr=setInterval(()=>gt(C+1),IV);
+}
 function stp(){clearInterval(tmr);pb.style.transition='none';pb.style.width='0%';}
 function setP(v){P=v;bpl.textContent=v?'⏸':'▶';v?sa():stp();shT(v?'▶ Autoplay':'⏸ Pausado');}
 function shT(m){tst.textContent=m;tst.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>tst.classList.remove('show'),1800);}
@@ -85,7 +109,23 @@ document.getElementById('bp').addEventListener('click',()=>gt(C-1));
 document.getElementById('bn').addEventListener('click',()=>gt(C+1));
 bpl.addEventListener('click',()=>setP(!P));
 function shUI(){document.body.classList.add('su');clearTimeout(ut);ut=setTimeout(()=>document.body.classList.remove('su'),3500);}
-document.addEventListener('mousemove',shUI);document.addEventListener('touchstart',shUI);
-document.addEventListener('keydown',e=>{shUI();switch(e.key){case'ArrowRight':case'PageDown':e.preventDefault();gt(C+1);break;case'ArrowLeft':case'PageUp':e.preventDefault();gt(C-1);break;case' ':e.preventDefault();setP(!P);break;case'f':case'F':tFS();break;}});
-let tx=null;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});document.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>50){dx<0?gt(C+1):gt(C-1);}tx=null;});
+document.addEventListener('mousemove',shUI);
+document.addEventListener('touchstart',shUI);
+document.addEventListener('keydown',e=>{
+  shUI();
+  switch(e.key){
+    case'ArrowRight':case'PageDown':e.preventDefault();gt(C+1);break;
+    case'ArrowLeft':case'PageUp':e.preventDefault();gt(C-1);break;
+    case' ':e.preventDefault();setP(!P);break;
+    case'f':case'F':tFS();break;
+  }
+});
+let tx=null;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});
+document.addEventListener('touchend',e=>{
+  if(tx===null)return;
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50){dx<0?gt(C+1):gt(C-1);}
+  tx=null;
+});
 <\/script></body></html>
