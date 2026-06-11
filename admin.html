@@ -295,33 +295,17 @@ async function doPublish(){
 
   try{
     const name=selFile.name.replace(/\.pptx$/i,'');
-    const ghPath=`uploads/tmp_${Date.now()}.pptx`;
 
-    // Step 1: Upload pptx to GitHub
-    setPP(10,'Fazendo upload do arquivo...');
+    // Mandar o pptx direto pro servidor Render (sem passar pelo GitHub)
+    setPP(10,'Lendo arquivo...');
     const bytes=await readBytes(selFile);
-    // Use Uint8Array chunks to avoid btoa stack overflow on large files
     const b64=await arrayBufferToBase64Safe(bytes);
-    setPP(25,'Enviando para o GitHub...');
 
-    // Upload to GitHub
-    const uploadPayload={message:'Temp upload pptx',content:b64};
-    const uploadResp=await fetch(`https://api.github.com/repos/${GH_REPO}/contents/${ghPath}`,{
-      method:'PUT',
-      headers:{Authorization:`token ${GT}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify(uploadPayload)
-    });
-    if(!uploadResp.ok){
-      const eData=await uploadResp.json().catch(()=>({}));
-      throw new Error('Erro no upload: '+(eData.message||uploadResp.status));
-    }
-
-    // Step 2: Ask server to process
-    setPP(50,'Convertendo slides (pode levar 1-2 min)...');
-    const procResp=await fetch(SERVER+'/process',{
+    setPP(30,'Enviando para conversão...');
+    const procResp=await fetch(SERVER+'/convert',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({gh_path:ghPath,name,action:'add'}),
+      body:JSON.stringify({pptx:b64,name,action:'add'}),
       signal:AbortSignal.timeout(300000)
     });
     if(!procResp.ok){
